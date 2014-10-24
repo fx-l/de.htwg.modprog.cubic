@@ -1,5 +1,3 @@
-A sample for the Typesafe Stack (http://typesafe.com/stack).
+A Scala project for the lecture "Moderne Programmiersprachen" at HTWG Konstanz.
 
-Scala sample project using Scala and SBT.
-
-To run and test it use SBT invoke: 'sbt run'
+Work in Progress.
