@@ -1,5 +1,9 @@
 package de.htwg.modprog.cubic
 
-object Cubic extends App {
-  println("Hello, Cubic")
+object Cubic {
+
+  def main(args: Array[String]) {
+    println("Hello, Cubic")
+  }
+
 }
