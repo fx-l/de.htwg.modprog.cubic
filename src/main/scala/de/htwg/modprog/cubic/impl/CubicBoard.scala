@@ -15,9 +15,7 @@ class CubicBoard(cube: Vector[Int]) {
   // val winningLines = Vector(1)
   //def hasWinner = browseLines(winningLines)
   
-  def lineComplete(line: Vector[Int]) = {
-    if (line.forall(cube(_) == 1) || line.forall(cube(_) == 2)) Some(line) else None
-  }
+  def lineComplete(line: Vector[Int]) = line.forall(cube(_) == 1) || line.forall(cube(_) == 2)
   
     
 }
