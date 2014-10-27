@@ -1,0 +1,149 @@
+<html> 
+   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/> 
+     <title>My first X3DOM page</title> 
+     <script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'> </script> 
+     <link rel='stylesheet' type='text/css' href='http://www.x3dom.org/download/x3dom.css'></link>
+	 <script>
+	 
+	 var gridCoords = [0, -1, 0, 5, -1, 0, 10, -1, 0, 15, -1, 0, 15, -1, 5, 15, -1, 10, 15, -1, 15, 10, -1, 15, 5, -1, 15, 0, -1, 15, 0, -1, 10, 0, -1, 5];
+	 
+	function createScene() {
+		
+		var scene = document.getElementById("scene");
+				
+		for(var y = 0; y <= 3; y++) {
+			var grid = createGrid(y);
+			scene.appendChild(grid);
+		}	
+		
+		
+		for (var x = 0; x <= 3; x++) {
+			for (var y = 0; y <= 3; y++) {
+				for (var z = 0; z <= 3; z++) {
+					var sphere = createSpheres(x, y, z);
+					scene.appendChild(sphere);
+				}
+			}
+		}	
+	}
+	
+	function createSpheres(x, y, z) {
+		// transform element
+		var transform = document.createElement("transform");
+		var coords = x*5 + " " + y*5 + " " + z*5;
+		//var coords = x + " " + y + " " + z;
+		transform.setAttribute("translation", coords);
+		// shape element
+		var shape = document.createElement("shape");
+		transform.appendChild(shape);
+		// appearance element
+		var appearance = document.createElement("appearance");
+		shape.appendChild(appearance);
+		// sphere element
+		var sphere = document.createElement("sphere");
+		shape.appendChild(sphere);
+		// material element
+		var material = document.createElement("material");
+		material.setAttribute("transparency", "0.2");
+		// color of material...
+		if(x == 0 && y == 0 && z == 0) {
+			material.setAttribute("diffuseColor", "blue");
+		} else if(x == 3 && y == 0 && z == 0) {
+			material.setAttribute("diffuseColor", "orange");
+		} else {
+			material.setAttribute("diffuseColor", "red");
+		}
+		appearance.appendChild(material);
+		
+		return transform;
+	}
+	
+	function createGrid(y) {
+		var realGridCoords = gridCoords.map(function(num) {
+			if(num == -1) { return y*5 } else { return num };
+		});
+		var gridCoordsString = realGridCoords.join([separator = ' ']);
+		// create dom
+		var shape = document.createElement("shape");
+		// appearance element
+		var appearance = document.createElement("appearance");
+		shape.appendChild(appearance);
+		// material element
+		var material = document.createElement("material");
+		material.setAttribute("diffuseColor", "black");
+		appearance.appendChild(material);
+		// indexedlineset element
+		var lineset = document.createElement("indexedlineset");
+		lineset.setAttribute("coordindex", "0 3 6 9 0 -1 1 8 -1 2 7 -1 4 11 -1 5 10 -1");
+		shape.appendChild(lineset);
+		// coordinate element
+		var coord = document.createElement("coordinate");
+		coord.setAttribute("point", gridCoordsString);
+		lineset.appendChild(coord);
+		
+		return shape;
+	}
+	
+	</script>
+   </head> 
+   <body onload="createScene()"> 
+     <h1>Hello, X3DOM!</h1> 
+     <p> 
+       This is my first html page with some 3d objects. 
+     </p> 
+	 <x3d width='1000px' height='800px'> 
+	   <scene id="scene">
+	   <Viewpoint centerOfRotation="7.5 7.5 7.5" position="7.5 7.5 55" orientation="0 0 1"
+	 description="camera"></Viewpoint>
+<!--  	<OrthoViewpoint centerOfRotation="7.5 7.5 7.5" position="55 7.5 7.5" orientation="0.70115 0 0.71274 3.14347"
+	 description="camera"></OrthoViewpoint>  -->
+	   <navigationInfo type='"examine" "all"' id="navType"></navigationInfo>
+	   
+<!-- 	   <shape>
+          <appearance>
+            <material <material diffuseColor='black'></material>
+          </appearance>
+          <indexedlineset coordindex='0 3 6 9 0 -1 1 8 -1 2 7 -1 4 11 -1 5 10 -1' >
+            <coordinate point='0 0 0 5 0 0 10 0 0 15 0 0 15 0 5 15 0 10 15 0 15 10 0 15 5 0 15 0 0 15 0 0 10 0 0 5'></coordinate>
+          </indexedlineset>
+        </shape> -->
+	   
+	   
+	   
+		<!-- <transform translation='0 0 0'> 
+		  <shape> 
+			 <appearance> 
+			   <material diffuseColor='0 0 1'></material> 
+			 </appearance> 
+			 <sphere></sphere> 
+		  </shape> 
+		</transform> 
+		<transform translation='3 0 0'> 
+		  <shape> 
+			 <appearance> 
+			   <material diffuseColor='0 0 1'></material> 
+			 </appearance> 
+			 <sphere></sphere> 
+		  </shape> 
+		</transform> 
+		<transform translation='6 0 0'> 
+		  <shape> 
+			 <appearance> 
+			   <material diffuseColor='0 0 1'></material> 
+			 </appearance> 
+			 <sphere></sphere> 
+		  </shape> 
+		</transform>
+		<transform translation='9 0 0'> 
+		  <shape> 
+			 <appearance> 
+			   <material diffuseColor='0 0 1'></material> 
+			 </appearance> 
+			 <sphere></sphere> 
+		  </shape> 
+		</transform>  -->
+	   </scene> 
+	</x3d> 
+   </body> 
+</html> 
