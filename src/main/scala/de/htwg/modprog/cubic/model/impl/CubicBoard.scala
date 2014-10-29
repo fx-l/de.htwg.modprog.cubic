@@ -1,7 +1,4 @@
-package de.htwg.modprog.cubic.impl
-
-import scala.util.control.TailCalls.TailRec
-import scala.annotation.tailrec
+package de.htwg.modprog.cubic.model.impl
 
 class CubicBoard(cube: Vector[Int]) {
   val sideLength = math.cbrt(cube.length).toInt
@@ -16,6 +13,15 @@ class CubicBoard(cube: Vector[Int]) {
   //def hasWinner = browseLines(winningLines)
   
   def lineComplete(line: Vector[Int]) = line.forall(cube(_) == 1) || line.forall(cube(_) == 2)
+  
+  def determineWinningLines() = {
+    val alongLevel = (for {
+      x <- (0 until sideLength)
+      y <- (0 until sideLength)
+      z <- (0 until sideLength) 
+      }	yield (coordToIndex(x, y, z), coordToIndex(y, z, x), coordToIndex(z, x, y))).unzip3
+      alongLevel._1 ++ alongLevel._2 ++ alongLevel._3
+  }
   
     
 }
