@@ -1,22 +1,22 @@
 <html> 
    <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/> 
-     <title>My first X3DOM page</title> 
+     <title>Cubic 4x4</title> 
      <script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'> </script> 
      <link rel='stylesheet' type='text/css' href='http://www.x3dom.org/download/x3dom.css'></link>
+     <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js" ></script>
 	 <script>
 	 
 	 var gridCoords = [0, -1, 0, 5, -1, 0, 10, -1, 0, 15, -1, 0, 15, -1, 5, 15, -1, 10, 15, -1, 15, 10, -1, 15, 5, -1, 15, 0, -1, 15, 0, -1, 10, 0, -1, 5];
 	 
 	function createScene() {
-		
+
 		var scene = document.getElementById("scene");
 				
 		for(var y = 0; y <= 3; y++) {
 			var grid = createGrid(y);
 			scene.appendChild(grid);
 		}	
-		
 		
 		for (var x = 0; x <= 3; x++) {
 			for (var y = 0; y <= 3; y++) {
@@ -28,6 +28,13 @@
 		}	
 	}
 	
+	function handleSingleClick(shape,event)
+    	{
+		$('#marker').attr('translation', event.hitPnt);
+    		$('#lastClickedObject').html($(shape).attr("def"));
+		$(shape).find('material').prop('diffuseColor', 'blue');
+    	}
+	
 	function createSpheres(x, y, z) {
 		// transform element
 		var transform = document.createElement("transform");
@@ -36,6 +43,8 @@
 		transform.setAttribute("translation", coords);
 		// shape element
 		var shape = document.createElement("shape");
+		shape.setAttribute("def",coords);
+		shape.setAttribute("onclick","handleSingleClick(this,event)");
 		transform.appendChild(shape);
 		// appearance element
 		var appearance = document.createElement("appearance");
@@ -47,13 +56,7 @@
 		var material = document.createElement("material");
 		material.setAttribute("transparency", "0.2");
 		// color of material...
-		if(x == 0 && y == 0 && z == 0) {
-			material.setAttribute("diffuseColor", "blue");
-		} else if(x == 3 && y == 0 && z == 0) {
-			material.setAttribute("diffuseColor", "orange");
-		} else {
-			material.setAttribute("diffuseColor", "red");
-		}
+		material.setAttribute("diffuseColor", "red");
 		appearance.appendChild(material);
 		
 		return transform;
@@ -88,62 +91,25 @@
 	</script>
    </head> 
    <body onload="createScene()"> 
-     <h1>Hello, X3DOM!</h1> 
-     <p> 
-       This is my first html page with some 3d objects. 
-     </p> 
-	 <x3d width='1000px' height='800px'> 
+     <h1>Cubic 4x4</h1> 
+	 <x3d width='500px' height='500px'> 
 	   <scene id="scene">
 	   <Viewpoint centerOfRotation="7.5 7.5 7.5" position="7.5 7.5 55" orientation="0 0 1"
 	 description="camera"></Viewpoint>
-<!--  	<OrthoViewpoint centerOfRotation="7.5 7.5 7.5" position="55 7.5 7.5" orientation="0.70115 0 0.71274 3.14347"
-	 description="camera"></OrthoViewpoint>  -->
 	   <navigationInfo type='"examine" "all"' id="navType"></navigationInfo>
-	   
-<!-- 	   <shape>
-          <appearance>
-            <material <material diffuseColor='black'></material>
-          </appearance>
-          <indexedlineset coordindex='0 3 6 9 0 -1 1 8 -1 2 7 -1 4 11 -1 5 10 -1' >
-            <coordinate point='0 0 0 5 0 0 10 0 0 15 0 0 15 0 5 15 0 10 15 0 15 10 0 15 5 0 15 0 0 15 0 0 10 0 0 5'></coordinate>
-          </indexedlineset>
-        </shape> -->
-	   
-	   
-	   
-		<!-- <transform translation='0 0 0'> 
-		  <shape> 
-			 <appearance> 
-			   <material diffuseColor='0 0 1'></material> 
-			 </appearance> 
-			 <sphere></sphere> 
-		  </shape> 
-		</transform> 
-		<transform translation='3 0 0'> 
-		  <shape> 
-			 <appearance> 
-			   <material diffuseColor='0 0 1'></material> 
-			 </appearance> 
-			 <sphere></sphere> 
-		  </shape> 
-		</transform> 
-		<transform translation='6 0 0'> 
-		  <shape> 
-			 <appearance> 
-			   <material diffuseColor='0 0 1'></material> 
-			 </appearance> 
-			 <sphere></sphere> 
-		  </shape> 
-		</transform>
-		<transform translation='9 0 0'> 
-		  <shape> 
-			 <appearance> 
-			   <material diffuseColor='0 0 1'></material> 
-			 </appearance> 
-			 <sphere></sphere> 
-		  </shape> 
-		</transform>  -->
+	<Transform id="marker" scale=".45 .45 .45" translation="100 0 0">
+            <Shape>
+                <Appearance>
+                    <Material diffuseColor="#FFD966"></Material>
+                </Appearance>
+                <Sphere></Sphere>
+            </Shape>
+        </Transform>
 	   </scene> 
-	</x3d> 
+	</x3d>
+	<div style="position:absolute;left:600px;top:70px;width:200px">
+	<h3>Koordinaten (x-Achse, y-Achse, z-Achse):</h3> 
+	<span id="lastClickedObject">-</span>
+</div>
    </body> 
-</html> 
+</html>
