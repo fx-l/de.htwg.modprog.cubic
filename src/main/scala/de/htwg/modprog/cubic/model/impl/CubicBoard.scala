@@ -14,7 +14,7 @@ class CubicBoard(cube: Vector[Int]) {
   
   def lineComplete(line: Vector[Int]) = line.forall(cube(_) == 1) || line.forall(cube(_) == 2)
   
-  def determineWinningLines() = {
+  def layerLines() = {
     val alongLevel = (for {
       x <- (0 until sideLength)
       y <- (0 until sideLength)
@@ -23,5 +23,11 @@ class CubicBoard(cube: Vector[Int]) {
       alongLevel._1 ++ alongLevel._2 ++ alongLevel._3
   }
   
+  def diagonalLines() = {
+    val max = sideLength - 1
+    val directions = Map((0,0,0) -> (1,1,1),(0,0,max) -> (1,1,-1),(max,0,max) -> (-1,1,-1),(max,0,0) -> (-1,1,1))
+    for((o, t) <- directions; i <- (0 until sideLength)) yield (coordToIndex(o._1 + i * t._1, o._2 + i * t._2,o._3 + i * t._3))
+    
+  }
     
 }
