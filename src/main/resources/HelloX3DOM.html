@@ -28,12 +28,13 @@
 			}
 		}	
 	}
-	
-	function handleSingleClick(shape,event)
+	    	
+	function handleColorAndSizeChange(shape,event)
     	{
 		$('#marker').attr('translation', event.hitPnt);
     	$('#lastClickedObject').html($(shape).attr("DEF"));
 		$(shape).find('material').prop('diffuseColor', 'blue');
+		$(shape).parent('transform').prop('scale', '.95 .95 .95');
     	}
 	
 	function createSpheres(x, y, z) {
@@ -41,11 +42,12 @@
 		var transform = document.createElement("transform");
 		var coords = x * scale + " " + y * scale + " " + z * scale;
 		//var coords = x + " " + y + " " + z;
+		transform.setAttribute("scale", ".55 .55 .55");
 		transform.setAttribute("translation", coords);
 		// shape element
 		var shape = document.createElement("shape");
 		shape.setAttribute("DEF", x + " " + y + " " + z);
-		shape.setAttribute("onclick","handleSingleClick(this,event)");
+		shape.setAttribute("onclick","handleColorAndSizeChange(this,event)");
 		transform.appendChild(shape);
 		// appearance element
 		var appearance = document.createElement("appearance");
@@ -57,7 +59,7 @@
 		var material = document.createElement("material");
 		material.setAttribute("transparency", "0.2");
 		// color of material...
-		material.setAttribute("diffuseColor", "red");
+		material.setAttribute("diffuseColor", "black");
 		appearance.appendChild(material);
 		
 		return transform;
@@ -98,7 +100,7 @@
 	   <Viewpoint centerOfRotation="7.5 7.5 7.5" position="7.5 7.5 55" orientation="0 0 1"
 	 description="camera"></Viewpoint>
 	   <navigationInfo type='"examine" "all"' id="navType"></navigationInfo>
-	<Transform id="marker" scale=".45 .45 .45" translation="1000 0 0">
+	<Transform id="marker" scale=".15 .15 .15" translation="1000 0 0">
             <Shape>
                 <Appearance>
                     <Material diffuseColor="#FFD966"></Material>
