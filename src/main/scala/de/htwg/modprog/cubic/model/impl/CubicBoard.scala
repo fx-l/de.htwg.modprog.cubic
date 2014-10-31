@@ -14,20 +14,31 @@ class CubicBoard(cube: Vector[Int]) {
   
   def lineComplete(line: Vector[Int]) = line.forall(cube(_) == 1) || line.forall(cube(_) == 2)
   
-  def layerLines() = {
-    val alongLevel = (for {
+  def lines = {
+    val alongLayer = (for {
       x <- (0 until sideLength)
       y <- (0 until sideLength)
       z <- (0 until sideLength) 
       }	yield (coordToIndex(x, y, z), coordToIndex(y, z, x), coordToIndex(z, x, y))).unzip3
-      alongLevel._1 ++ alongLevel._2 ++ alongLevel._3
+      alongLayer._1 ++ alongLayer._2 ++ alongLayer._3
   }
   
-  def diagonalLines() = {
+  def spaceDiagonals = {
     val max = sideLength - 1
-    val directions = Map((0,0,0) -> (1,1,1),(0,0,max) -> (1,1,-1),(max,0,max) -> (-1,1,-1),(max,0,0) -> (-1,1,1))
-    for((o, t) <- directions; i <- (0 until sideLength)) yield (coordToIndex(o._1 + i * t._1, o._2 + i * t._2,o._3 + i * t._3))
-    
+    spanDiagonals(Vector(((0,0,0), (1,1,1)),
+    					((0,0,max), (1,1,-1)),
+    					((max,0,max), (-1,1,-1)),
+    					((max,0,0), (-1,1,1))))
   }
+  
+  def spanDiagonals(transformations: Seq[((Int,Int,Int),(Int,Int,Int))]) = {
+    transformations.map {
+      case (a,b) => (a._1 + b._1 * sideLength, a._2 + b._2 * sideLength, a._3 + b._3 * sideLength)
+    }
+  }
+  
+
+  
+
     
 }
