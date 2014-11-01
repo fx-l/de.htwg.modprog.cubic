@@ -1,24 +1,31 @@
 package de.htwg.modprog.cubic.model.impl
 
 import scala.annotation.tailrec
+import de.htwg.modprog.cubic.model.Board
 
-class CubicBoard(cube: Vector[Int]) {
-  val sideLength = math.cbrt(cube.length).toInt
-  require(cube.length == math.pow(sideLength, 3).toInt)
-  val winningLines = determineWinningLines
-  def coordToIndex(x: Int, y: Int, z: Int) = x + y * sideLength + z * math.pow(sideLength, 2).toInt
-  def field(x: Int, y: Int, z: Int) = cube(coordToIndex(x, y, z))
-  def fieldIsEmpty(x: Int, y: Int, z: Int) = field(x, y, z) == 0
-  def insertCoin(x: Int, y: Int, z: Int, value: Int) = new CubicBoard(cube.updated(coordToIndex(x, y, z), value))
-  override def toString() = "board: " + sideLength + ("x" + sideLength) * 2 + ", content: " + cube
-  
-  
-  //def hasWinner = browseLines(winningLines)
-  
+class CubicBoard private(val cube: Vector[Int], val winningCoords: Vector[(Int, Int, Int)]) extends Board {
+  val n = math.cbrt(cube.length).toInt
+  val winningLines = for((x, y, z) <- winningCoords) yield (coordToIndex(x, y, z))
+  def coordToIndex(x: Int, y: Int, z: Int) = x + y * n + z * math.pow(n, 2).toInt
+  override def field(x: Int, y: Int, z: Int) = cube(coordToIndex(x, y, z))
+  override def fieldIsEmpty(x: Int, y: Int, z: Int) = field(x, y, z) == 0
+  override def toString() = "board: " + n + ("x" + n) * 2 + ", content: " + cube
+  override def insertCoin(x: Int, y: Int, z: Int, value: Int) = {
+    new CubicBoard(cube.updated(coordToIndex(x, y, z), value), winningCoords)
+  }
+  override def hasWinner = ???
   def lineComplete(line: Vector[Int]) = line.forall(cube(_) == 1) || line.forall(cube(_) == 2)
-  
-  def determineWinningLines = {
-    val max = sideLength - 1
+}
+
+object CubicBoard {
+  def apply(sideLength: Int) = {
+    require(sideLength > 1)
+    val cube = Vector.fill(math.pow(sideLength, 3).toInt)(0)
+    val winningCoords = determineWinningCoords(sideLength)
+    new CubicBoard(cube, winningCoords)
+  }
+  def determineWinningCoords(n: Int) = {
+    val max = n - 1
     val winningLinesDescription = Vector(
         ((0,0,0), List((0,1,0),(0,0,1),(1,0,0))), 		// lineset along x axis
         ((0,0,0), List((1,0,0),(0,0,1),(0,1,0))), 		// ... y axis
@@ -34,24 +41,21 @@ class CubicBoard(cube: Vector[Int]) {
         ((max,0,max), List((-1,1,-1))),					// ... #3
         ((max,0,0), List((-1,1,1)))						// ... #4
     )
-    val result = for((base, trans) <- winningLinesDescription) yield span(Vector(base), trans)
+    val result = for((base, trans) <- winningLinesDescription) yield span(n, Vector(base), trans)
     result.flatten
   }
-     
-  def spanLines(base: Seq[(Int, Int, Int)], direction: (Int, Int, Int)) = {
+  def spanLines(n: Int, base: Seq[(Int, Int, Int)], direction: (Int, Int, Int)) = {
     val (vX, vY, vZ) = direction
     for {
       (x, y, z) <- base 
-      i <- (0 until sideLength)
+      i <- (0 until n)
     } yield (x + vX * i, y + vY * i, z + vZ * i)
   }
-  
-  //@tailrec
-  def span(baseLines: Seq[(Int, Int, Int)], dirs: List[(Int, Int, Int)]): Seq[(Int, Int, Int)] = {
+  @tailrec
+  def span(n: Int, baseLines: Seq[(Int, Int, Int)], dirs: List[(Int, Int, Int)]): Seq[(Int, Int, Int)] = {
     dirs match {
       case Nil => baseLines
-      case d :: tail => span(spanLines(baseLines, d), tail)
+      case d :: tail => span(n, spanLines(n, baseLines, d), tail)
     }	  
   }
-   
 }
