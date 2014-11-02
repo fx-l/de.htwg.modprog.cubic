@@ -21,4 +21,21 @@ class Tui(var controller: CubicController) extends Reactor {
     }
     continue
   }
+  
+//    def createTUI = {
+//    for (i <- 0 to 3) {
+//      println(" " * (16 * i) + "----------------")
+//      for (y <- (16 * i) until (16 * (i + 1))) {
+//        if (y % 4 == 0) {
+//          print(" " * (16 * i) + "|  " + cube.apply(y) + "  ")
+//        } else if ((y - 3) % 4 == 0) {
+//          println(cube.apply(y) + "  |")
+//        } else {
+//          print(cube.apply(y) + "  ")
+//        }
+//      }
+//      println(" " * (16 * i) + "----------------")
+//    }
+//  }
+    
 }

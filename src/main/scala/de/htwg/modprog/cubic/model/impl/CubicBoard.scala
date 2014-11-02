@@ -15,22 +15,6 @@ class CubicBoard private (val cube: Vector[Int], val winningCoords: Vector[(Int,
   }
   override def hasWinner = ???
   def lineComplete(line: Vector[Int]) = line.forall(cube(_) == 1) || line.forall(cube(_) == 2)
-
-  def createTUI = {
-    for (i <- 0 to 3) {
-      println(" " * (16 * i) + "----------------")
-      for (y <- (16 * i) until (16 * (i + 1))) {
-        if (y % 4 == 0) {
-          print(" " * (16 * i) + "|  " + cube.apply(y) + "  ")
-        } else if ((y - 3) % 4 == 0) {
-          println(cube.apply(y) + "  |")
-        } else {
-          print(cube.apply(y) + "  ")
-        }
-      }
-      println(" " * (16 * i) + "----------------")
-    }
-  }
 }
 
 object CubicBoard {
