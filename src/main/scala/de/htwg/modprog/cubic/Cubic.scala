@@ -1,6 +1,5 @@
 package de.htwg.modprog.cubic
 import de.htwg.modprog.cubic.view.tui.Tui
-import de.htwg.modprog.cubic.model.impl.Matrix
 import de.htwg.modprog.cubic.controller.CubicController
 import de.htwg.modprog.cubic.model.impl.CubicBoard
 

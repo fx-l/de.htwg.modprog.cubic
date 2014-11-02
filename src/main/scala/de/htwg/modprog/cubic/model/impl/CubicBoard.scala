@@ -39,7 +39,7 @@ object CubicBoard {
   }
   def determineWinningCoords(n: Int) = {
     val max = n - 1
-    val winningLinesDescription = Vector(
+    val winningLinesGenericDescription = Vector(
         ((0,0,0), List((0,1,0),(0,0,1),(1,0,0))), 		// lineset along x axis
         ((0,0,0), List((1,0,0),(0,0,1),(0,1,0))), 		// ... y axis
         ((0,0,0), List((1,0,0),(0,1,0),(0,0,1))), 		// ... z axis
@@ -54,7 +54,7 @@ object CubicBoard {
         ((max,0,max), List((-1,1,-1))),					// ... #3
         ((max,0,0), List((-1,1,1)))						// ... #4
     )
-    val result = (for((base, trans) <- winningLinesDescription) yield span(n, Vector(base), trans)).flatten
+    val result = (for((base, trans) <- winningLinesGenericDescription) yield span(n, Vector(base), trans)).flatten
     for((x, y, z) <- result) yield(transformCoords(n)(x, y, z))
   }
 }
