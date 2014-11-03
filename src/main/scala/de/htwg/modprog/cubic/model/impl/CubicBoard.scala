@@ -1,31 +1,54 @@
 package de.htwg.modprog.cubic.model.impl
 
 import scala.annotation.tailrec
-import de.htwg.modprog.cubic.model.Board
+import de.htwg.modprog.cubic.model._
 import de.htwg.modprog.cubic.model.impl.CubicBoard._
 
-class CubicBoard private(val cube: Vector[Int], val winningLines: Vector[Int]) extends Board {
+class CubicBoard private(val cube: IndexedSeq[Field], val winningLines: List[Seq[Int]]) extends Board {
   val n = math.cbrt(cube.length).toInt
   def coordToIndex = transformCoords(n) _
   override def field(x: Int, y: Int, z: Int) = cube(coordToIndex(x, y, z))
-  override def fieldIsEmpty(x: Int, y: Int, z: Int) = field(x, y, z) == 0
+  override def fieldIsOccupied(x: Int, y: Int, z: Int) = !field(x, y, z).isOccupied
   override def toString() = "board: " + n + ("x" + n) * 2 + ", content: " + cube
-  override def insertCoin(x: Int, y: Int, z: Int, value: Int) = {
-    new CubicBoard(cube.updated(coordToIndex(x, y, z), value), winningLines)
+  def lineComplete(line: Seq[Int]) = {
+    val proto = cube(line(0))
+    if(proto.isOccupied) line.forall(cube(_).occupiedBy == proto.occupiedBy) else false
   }
-  override def hasWinner = {
-    ???
+  def determineResult(remainingLines: List[Seq[Int]]): Option[Seq[Int]] = {
+    remainingLines match {
+      case line :: tail => if(lineComplete(line)) Some(line) else determineResult(tail)
+      case Nil => None
+    }
   }
-  def lineComplete(line: Vector[Int]) = line.forall(cube(_) == 1) || line.forall(cube(_) == 2)
+  def createResult(line: Seq[Int]) = {
+    highlightFields(line, cube)
+  }
+  def highlightFields(f: Seq[Int], cube: IndexedSeq[Field]): IndexedSeq[Field] = {
+    if(!f.isEmpty) highlightFields(f.tail, cube.updated(f.head, cube(f.head).highlight)) else cube
+  }
+  
+  override def hasWinner = determineResult(winningLines) match {
+    case Some(s: Seq[Int]) => ???
+    case _ => None
+  }
+  override def occupyField(x: Int, y: Int, z: Int, p: Player) = {
+    val i = coordToIndex(x, y, z)
+    if(cube(i).isOccupied) {
+      this
+    }else { 
+      new CubicBoard(cube.updated(i, cube(i).occupy(p)), winningLines)
+    }
+  }
+  
 }
 
 object CubicBoard {
   def transformCoords(n: Int)(x: Int, y: Int, z: Int) = x + y * n + z * math.pow(n, 2).toInt
   def apply(sideLength: Int) = {
     require(sideLength > 1)
-    val cube = Vector.fill(math.pow(sideLength, 3).toInt)(0)
+    val cube = Vector.fill(math.pow(sideLength, 3).toInt)(CubicField())
     val winningCoords = determineWinningCoords(sideLength)
-    new CubicBoard(cube, winningCoords)
+    new CubicBoard(cube, winningCoords.toList)
   }
   def spanLines(n: Int, base: Seq[(Int, Int, Int)], to: (Int, Int, Int)) = {
     for ((x, y, z) <- base; i <- (0 until n)) yield (x + to._1  * i, y + to._2 * i, z + to._3 * i)
@@ -39,7 +62,7 @@ object CubicBoard {
   }
   def determineWinningCoords(n: Int) = {
     val max = n - 1
-    val winningLinesGenericDescription = Vector(
+    val winningLinesGenericDescription = Seq(
         ((0,0,0), List((0,1,0),(0,0,1),(1,0,0))), 		// lineset along x axis
         ((0,0,0), List((1,0,0),(0,0,1),(0,1,0))), 		// ... y axis
         ((0,0,0), List((1,0,0),(0,1,0),(0,0,1))), 		// ... z axis
@@ -54,7 +77,7 @@ object CubicBoard {
         ((max,0,max), List((-1,1,-1))),					// ... #3
         ((max,0,0), List((-1,1,1)))						// ... #4
     )
-    val result = (for((base, trans) <- winningLinesGenericDescription) yield span(n, Vector(base), trans)).flatten
-    for((x, y, z) <- result) yield(transformCoords(n)(x, y, z))
+    val result = (for((base, trans) <- winningLinesGenericDescription) yield span(n, Seq(base), trans)).flatten
+    (for((x, y, z) <- result) yield(transformCoords(n)(x, y, z))).grouped(n)
   }
 }
