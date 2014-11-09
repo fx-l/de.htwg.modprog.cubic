@@ -31,7 +31,7 @@ extends Board {
   }  
   // check if a specific winning line is occupied by the same player
   private def lineComplete(line: Seq[Int]) = {
-    val proto = cube(line(0))
+    val proto = cube(line.head)
     if(proto.isOccupied) line.forall(cube(_).occupiedBy == proto.occupiedBy) else false
   }
   // recursively highlight a set of fields in the cube
@@ -65,7 +65,7 @@ object CubicBoard {
         ((0,0,0), List((1,0,0),(0,0,1),(0,1,0))), 		// ... y axis
         ((0,0,0), List((1,0,0),(0,1,0),(0,0,1))), 		// ... z axis
         ((0,0,0), List((1,0,0),(0,1,1))),				// diagonalset #1 along x axis
-        ((0,0,max), List((1,0,0),(0,1,1))),				// ... #2
+        ((0,0,max), List((1,0,0),(0,1,-1))),				// ... #2
         ((0,0,0), List((0,1,0),(1,0,1))),				// diagonalset #1 along y axis
         ((0,0,max), List((0,1,0),(1,0,-1))),			// ... #2
         ((0,0,0), List((0,0,1),(1,1,0))),				// diagonalset #1 along z axis
