@@ -9,6 +9,8 @@ class CubicGame private(val board: Board, val currentPlayer: Player, val otherPl
     new CubicGame(board, others.head, others.tail)
   }
   
+
+  
   override def toString = "current player: " + currentPlayer + ", waiting players: " + otherPlayers
   
   
