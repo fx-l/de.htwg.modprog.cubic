@@ -12,6 +12,8 @@ case class FieldChanged() extends Event
 class CubicController(var game: Game) extends Publisher {
   var statusText = ""
   def boardSize = game.size
+  def currentPlayer = game.currentPlayer.toString
+  def moveCount = game.moveCount
   def createGame(playerIdentifiers: Seq[String], size: Int = 4) = {
     val players = playerIdentifiers.map(CubicPlayer(_)).toList
     game = game.create(players, size)

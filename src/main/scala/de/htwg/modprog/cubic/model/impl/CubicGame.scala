@@ -6,11 +6,12 @@ class CubicGame private(val board: Board, val players: List[Player]) extends Gam
   
   val currentPlayer = players.head
   override def size: Int = board.n
+  override def moveCount = board.moves
   override def isFieldOccupied(x: Int, y: Int, z: Int) = ???
   override def occupyField(x: Int, y: Int, z: Int) = {
-    val move = board.occupyField(x, y, z, currentPlayer).updateWinnerState
+    val nextBoard = board.occupyField(x, y, z, currentPlayer).updateWinnerState
     val step = players.drop(1) :+ currentPlayer
-    new CubicGame(move, step)
+    new CubicGame(nextBoard, step)
   }
   override def field(x: Int, y: Int, z: Int) = board.field(x, y, z)
   

@@ -3,6 +3,7 @@ package de.htwg.modprog.cubic.model
 trait Game {
   def size: Int
   def currentPlayer: Player
+  def moveCount: Int
   def isFieldOccupied(x: Int, y: Int, z: Int): Boolean
   def occupyField(x: Int, y: Int, z: Int): Game
   def field(x: Int, y: Int, z: Int): Field

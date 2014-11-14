@@ -5,17 +5,28 @@ import scala.swing.Reactor
 import de.htwg.modprog.cubic.controller.CubicController
 import de.htwg.modprog.cubic.controller.CubicController
 import de.htwg.modprog.cubic.controller.FieldChanged
+import java.io.File
+import scala.io.Source._
 
 class Tui(var controller: CubicController) extends Reactor {
+  
+  def n = controller.boardSize
+  val nl = sys.props("line.separator") // new line
+  val b = "-" * (n * 3 + 1) // border
+  val s = 10 // spacer
+    
   listenTo(controller)
+  //println(fromFile("scala/main/resources/tui_intro_template.txt").mkString)
   printTui
   reactions += {
     case e: FieldChanged => printTui
   }
   def update = printTui
   def printTui = {
+    drawHud
     drawGame
-    println("Enter command: n: new game, q: quit")
+    drawCommands
+    drawCommands2
   }
   
   def processInputLine(input: String) = {
@@ -33,33 +44,26 @@ class Tui(var controller: CubicController) extends Reactor {
     continue
   }
   
+  def drawHud = println("turn: " + controller.currentPlayer + ", move: " + controller.moveCount)
+  def drawCommands = println("Enter command: n: new game, q: quit")
+  def drawCommands2 = println("Enter xyz, where each is in the range 0 to " + (controller.boardSize - 1))
+  
   def drawGame = {
-    val n = controller.boardSize
-    val nl = sys.props("line.separator")
-    val border = " -" * (n * 2 -1)
-    
-    def drawLine(accum: String, x: Int, y: Int, z: Int): String = {
-      if(x < n) drawLine(accum + getField(x, y, z), x + 1, y, z) else accum + "/" + nl
+    def line(acc: String, x: Int, y: Int, z: Int): String = {
+      if(x < n) line(acc + getField(x, y, z), x + 1, y, z) else acc + "/" + nl
     }
-    
-    def drawLayer(accum: String, y: Int, z: Int): String = {
-      if(z >= 0) drawLayer(drawLine(accum, 0, y, z), y, z - 1) else accum + border + nl
+    def layer(acc: String, y: Int, z: Int): String = {
+      if(z >= 0) layer(line(acc + " " * (z + s) + "/", 0, y, z), y, z - 1) else acc + " " * s + b + nl
     }
-    
-    def drawCube(accum: String, y: Int): String = {
-      if(y < n) drawCube(drawLayer(accum, y, n - 1), y + 1) else border + nl + accum
+    def cube(acc: String, y: Int): String = {
+      if(y < n) cube(layer(acc + " " * (s + n) + b + nl, y, n - 1), y + 1) else acc
     }
-    
     def getField(x: Int, y: Int, z: Int) = {
       val (player, highlight) = controller.field(x, y, z)
       val symbol = if(player != None) "X" else "."
       if(highlight) "[" + symbol + "]" else " " + symbol + " "
     }
-    
-    println(drawCube("", 0))
-
+    println(cube("", 0))
   }
-   
-
-    
+  
 }

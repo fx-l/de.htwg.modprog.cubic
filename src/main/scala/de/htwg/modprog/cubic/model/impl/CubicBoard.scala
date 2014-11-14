@@ -7,21 +7,24 @@ import de.htwg.modprog.cubic.model.impl.CubicBoard._
 class CubicBoard private(
     val cube: IndexedSeq[Field],
     val winningLines: List[Seq[Int]],
-    val hasWinner: Option[Player])
+    val hasWinner: Option[Player],
+    val moves: Int)
 extends Board {
   val n = math.cbrt(cube.length).toInt
   def coordToIndex = transformCoords(n) _
+  def validCoords(x: Int, y: Int, z: Int) = List(x, y, z).forall(x => x >= 0 && x < n)
   override def field(x: Int, y: Int, z: Int) = cube(coordToIndex(x, y, z))
   override def fieldIsOccupied(x: Int, y: Int, z: Int) = !field(x, y, z).isOccupied
   override def toString() = "board: " + n + ("x" + n) * 2 + ", winner: " + hasWinner + ", content: " + cube
   // occupy a field
   override def occupyField(x: Int, y: Int, z: Int, p: Player) = {
-    val i = coordToIndex(x, y, z)
-    if(cube(i).isOccupied) this else new CubicBoard(cube.updated(i, cube(i).occupy(p)), winningLines, hasWinner)
+    val i = coordToIndex(x, y, z)    
+    if(!validCoords(x, y, z) || cube(i).isOccupied) this else
+      new CubicBoard(cube.updated(i, cube(i).occupy(p)), winningLines, hasWinner, moves + 1)
   }
   // in case of available winner, involved line gets highlighted and player is set
   override def updateWinnerState = isSolved(winningLines) match {
-    case Some(at: Seq[Int]) => new CubicBoard(highlightFields(at, cube), winningLines, cube(at(0)).occupiedBy)
+    case Some(at: Seq[Int]) => new CubicBoard(highlightFields(at, cube), winningLines, cube(at(0)).occupiedBy, moves)
     case _ => this
   }
   // check if the game is solved by recursively evaluating winning lines
@@ -46,7 +49,7 @@ object CubicBoard {
     require(sideLength > 1)
     val cube = Vector.fill(math.pow(sideLength, 3).toInt)(CubicField())
     val winningCoords = determineWinningCoords(sideLength)
-    new CubicBoard(cube, winningCoords.toList, None)
+    new CubicBoard(cube, winningCoords.toList, None, 0)
   }
   def spanLines(n: Int, base: Seq[(Int, Int, Int)], to: (Int, Int, Int)) = {
     for ((x, y, z) <- base; i <- (0 until n)) yield (x + to._1  * i, y + to._2 * i, z + to._3 * i)

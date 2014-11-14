@@ -4,7 +4,7 @@ version := "1.0"
 
 scalaVersion := "2.11.4" 
 
-libraryDependencies += "org.scala-lang" % "scala-swing" % "2.10.4"
+libraryDependencies += "org.scala-lang" % "scala-swing" % "2.11.0-M7"
 
 libraryDependencies += "org.scalafx" %% "scalafx" % "8.0.20-R6"
 
