@@ -12,22 +12,20 @@ class Tui(var controller: CubicController) extends Reactor {
   
   def n = controller.boardSize
   val nl = sys.props("line.separator") // new line
-  val b = "-" * (n * 3 + 1) // border
+  def b = "-" * (n * 3 + 1) // border
   val s = 10 // spacer
+  val defaultGameSize = 4
+  val defaultNamePrefix = "Player"
+  val intro = loadString("/tui_intro.txt")
+  val menu = loadString("/tui_menu.txt")
     
   listenTo(controller)
-  //println(fromFile("scala/main/resources/tui_intro_template.txt").mkString)
-  printTui
+  drawHeader
   reactions += {
-    case e: FieldChanged => printTui
+    case e: FieldChanged => drawFullUi
   }
-  def update = printTui
-  def printTui = {
-    drawHud
-    drawGame
-    drawCommands
-    drawCommands2
-  }
+  def update = drawFullUi
+
   
   def processInputLine(input: String) = {
     var continue = true
@@ -44,8 +42,20 @@ class Tui(var controller: CubicController) extends Reactor {
     continue
   }
   
-  def drawHud = println("turn: " + controller.currentPlayer + ", move: " + controller.moveCount)
-  def drawCommands = println("Enter command: n: new game, q: quit")
+  def drawFullUi = {
+    drawHeader
+    drawGame
+    drawHud
+    drawCommands2
+  }
+ 
+  def drawHeader = {
+    println(intro)
+    println(menu)
+  }
+  
+  def drawHud = println("Turn: " + controller.currentPlayer + ", move: " + controller.moveCount)
+
   def drawCommands2 = println("Enter xyz, where each is in the range 0 to " + (controller.boardSize - 1))
   
   def drawGame = {
@@ -65,5 +75,28 @@ class Tui(var controller: CubicController) extends Reactor {
     }
     println(cube("", 0))
   }
+  
+  def askConfig = {
+    
+  }
+  
+  def askForPlayers(pc: Int, acc: List[String]): List[String] = pc match {
+    case pc if pc > 0 => {
+      val defaultName = defaultNamePrefix + " " + acc.length + 1
+      println("Enter name of " + defaultName + " (defaults to: " + defaultName + ")")
+      val in = readLine().trim
+      askForPlayers(pc - 1, (if (in == "") defaultName else in) :: acc)
+    }
+    case _ => acc reverse
+  }
+  
+  def askForBoard = {
+    println("Enter size of board (defaults to: " + defaultGameSize + ")")
+    val in = readLine().trim
+    //if(in == "")
+    ???
+  }
+  
+  def loadString(path: String) = fromURL(getClass.getResource(path)).mkString
   
 }

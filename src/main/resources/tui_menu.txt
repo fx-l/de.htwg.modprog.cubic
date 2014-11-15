@@ -1,0 +1,5 @@
+  Menu
+  - create quick game (4*4*4): [a] Player vs. Player, [b] Player vs. CPU
+  - create customized game (n*n*n, x Players): [c] 
+  - restart game with current settings: [r]
+ 

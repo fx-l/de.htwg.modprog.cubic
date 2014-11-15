@@ -32,7 +32,7 @@ class CubicController(var game: Game) extends Publisher {
   def field(x: Int, y: Int, z: Int) = {
     val f = game.field(x, y, z)
     f.occupiedBy match {
-      case Some(p: Player) => (Some(p.identifier), f.isHighlighted)
+      case Some(p: Player) => (Some(p.name), f.isHighlighted)
       case _ => (None, f.isHighlighted)
     }
   }
