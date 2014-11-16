@@ -2,35 +2,31 @@ package de.htwg.modprog.cubic.model.impl
 
 import de.htwg.modprog.cubic.model._
 
-class CubicGame private(val board: Board, val players: List[Player]) extends Game {
-  
-  val currentPlayer = players.head
+class CubicGame private(val board: Board, val pb: PlayerBin) extends Game {
+  override val currentPlayer = pb.current
+  override val waitingPlayers = pb.waiting
+  override val players = pb.players
+  override val hasWinner = board.hasWinner
   override def size: Int = board.n
   override def moveCount = board.moves
-  override def isFieldOccupied(x: Int, y: Int, z: Int) = ???
+  override def isFieldOccupied(x: Int, y: Int, z: Int) = board.fieldIsOccupied(x, y, z)
+  override def field(x: Int, y: Int, z: Int) = board.field(x, y, z)
+  override def restart = new CubicGame(CubicBoard(size), pb)
+  override def create(players: Seq[Player], size: Int) = CubicGame(players, size)
+  override def toString = "move: " + moveCount + ", current player: " + currentPlayer + ", others: " + waitingPlayers
   override def occupyField(x: Int, y: Int, z: Int) = {
     val nextBoard = board.occupyField(x, y, z, currentPlayer).updateWinnerState
-    val step = players.drop(1) :+ currentPlayer
-    new CubicGame(nextBoard, step)
+    if(nextBoard.moves > board.moves) new CubicGame(nextBoard, pb.iterate) else this
   }
-  override def field(x: Int, y: Int, z: Int) = board.field(x, y, z)
-  
-  override def restart = create(players, size)
-  override def create(players: List[Player], size: Int) = CubicGame(players, size)
-  
-  override def toString = "current player: " + currentPlayer + ", all players: " + players
-  
-  
-
 }
 
 object CubicGame {
-  def apply(players: List[Player], n: Int = 4) = {
+  def apply(players: Seq[Player], n: Int) = {
     require(n > 1)
     require(players.length > 0)
-    new CubicGame(CubicBoard(n), players)
+    new CubicGame(CubicBoard(n), CubicPlayerBin(players))
   }
   def apply(): Game = {
-    apply(List(CubicPlayer("Player 1")), 4)
+    apply(List(CubicPlayer("Player 1"), CubicPlayer("Player 2")), 4)
   }
 }

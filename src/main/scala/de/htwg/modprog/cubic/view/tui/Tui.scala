@@ -7,8 +7,11 @@ import de.htwg.modprog.cubic.controller.CubicController
 import de.htwg.modprog.cubic.controller.FieldChanged
 import java.io.File
 import scala.io.Source._
+import de.htwg.modprog.cubic.controller.GameCreated
 
 class Tui(var controller: CubicController) extends Reactor {
+  
+  listenTo(controller)
   
   def n = controller.boardSize
   val nl = sys.props("line.separator") // new line
@@ -18,19 +21,21 @@ class Tui(var controller: CubicController) extends Reactor {
   val defaultNamePrefix = "Player"
   val intro = loadString("/tui_intro.txt")
   val menu = loadString("/tui_menu.txt")
-    
-  listenTo(controller)
-  drawHeader
+  val symbols = Seq('X', 'O')
+  var symbolMapping = Map[String, Char]()
+  
   reactions += {
-    case e: FieldChanged => drawFullUi
+    case e: GameCreated => onGameCreated
+    case e: FieldChanged => onGameUpdated
   }
-  def update = drawFullUi
-
   
   def processInputLine(input: String) = {
     var continue = true
     input match {
-      case "n" => controller.createGame(Seq("A", "B"), 4)
+      case "a" => controller.createQuickVersusGame("", "")
+      case "b" => controller.createQuickCpuGame("")
+      case "c" => controller.createCustomGame(Seq(("", false)), 4)
+      case "r" => controller.restart
       case "q" => continue = false
       case _ => {
         input.toList.filter(c => c != ' ').map(c => c.toString.toInt) match {
@@ -40,6 +45,16 @@ class Tui(var controller: CubicController) extends Reactor {
       }
     }
     continue
+  }
+  
+  def onGameCreated = {
+    val nameList = controller.players.map{ case(name, _) => name }.toList
+    symbolMapping = assignSymbols(nameList, symbols, Map[String, Char]())
+    onGameUpdated
+  }
+  
+  def onGameUpdated = {
+    drawFullUi
   }
   
   def drawFullUi = {
@@ -70,7 +85,10 @@ class Tui(var controller: CubicController) extends Reactor {
     }
     def getField(x: Int, y: Int, z: Int) = {
       val (player, highlight) = controller.field(x, y, z)
-      val symbol = if(player != None) "X" else "."
+      val symbol = player match {
+        case Some(name) => symbolMapping(name)
+        case None => "."
+      }
       if(highlight) "[" + symbol + "]" else " " + symbol + " "
     }
     println(cube("", 0))
@@ -98,5 +116,16 @@ class Tui(var controller: CubicController) extends Reactor {
   }
   
   def loadString(path: String) = fromURL(getClass.getResource(path)).mkString
+  
+  def assignSymbols(names: List[String], sym: Seq[Char], m: Map[String, Char]): Map[String, Char] = {
+    names match {
+      case name :: tail => { 
+        val symbol = if(!sym.isEmpty) sym.take(1)(0) else '0' // 0 = symbols depleted
+        assignSymbols(tail, sym.drop(1), m + (name -> symbol))
+      }
+      case Nil => m
+    }
+    
+  }
   
 }

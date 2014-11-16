@@ -11,9 +11,9 @@ class CubicPlayerBin private(val players: List[Player]) extends PlayerBin {
 }
 
 object CubicPlayerBin {
-  def apply(players: List[Player]) = {
+  def apply(players: Seq[Player]) = {
     require(players.length > 0)
-    val namedPlayers = players.map(defaultName(_))
+    val namedPlayers = players.map(defaultName(_)).toList
     new CubicPlayerBin(disambiguate(namedPlayers))
   }
   def defaultName(p: Player) = (p.name, p.isCpu) match {
