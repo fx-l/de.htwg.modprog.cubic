@@ -56,25 +56,44 @@ object Gui extends JFXApp {
   private def createMenus() = new MenuBar {
     menus = List(
       new Menu("File") {
-        items = List(
-          new MenuItem("New Game") {
+        items = List(new MenuItem("Restart") {
+          accelerator = KeyCombination.keyCombination("r")
+          onAction = {
+            e: ActionEvent => println(e.eventType + " Restart... clicked!")
+          }
+        }, new Menu("New Game") {
+          items = List(new MenuItem("Player vs. Player") {
+            accelerator = KeyCombination.keyCombination("a")
+            onAction = {
+              e: ActionEvent => println(e.eventType + " Player vs. Player... clicked!")
+            }
+          }, new MenuItem("Player vs. Computer") {
+            accelerator = KeyCombination.keyCombination("b")
+            onAction = {
+              e: ActionEvent => println(e.eventType + " Player vs. Computer... clicked!")
+            }
+          }, new MenuItem("Custom Game") {
+            accelerator = KeyCombination.keyCombination("c")
             onAction = {
               e: ActionEvent => println(e.eventType + " New... clicked!")
             }
-          },
-          new MenuItem("Quit") {
-            accelerator = KeyCombination.keyCombination("Ctrl +Q")
+          })
+        },
+          new MenuItem("How to play") {
+            accelerator = KeyCombination.keyCombination("h")
+            onAction = {
+             e: ActionEvent => println(e.eventType + " How to play... clicked!")
+            }
+          }, new MenuItem("About") {
+            accelerator = KeyCombination.keyCombination("i")
+            onAction = {
+              e: ActionEvent => println(e.eventType + " About... clicked!")
+            }
+          }, new MenuItem("Quit") {
+            accelerator = KeyCombination.keyCombination("q")
             onAction = {
               e: ActionEvent => System.exit(0)
             }
-          })
-      },
-      new Menu("Options") {
-        items = List(
-          new Menu("Difficulty Level") {
-            items = List(
-              new MenuItem("Easy"),
-              new MenuItem("Hard"))
           })
       })
   }
