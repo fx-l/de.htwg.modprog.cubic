@@ -2,4 +2,5 @@
                                 Player vs. CPU     [b]
            - create customized game                [c] 
            - restart with current settings         [r]
+           - quit                                  [q]									
  
