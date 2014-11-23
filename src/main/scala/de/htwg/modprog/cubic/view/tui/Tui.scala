@@ -3,11 +3,11 @@ package de.htwg.modprog.cubic.view.tui
 import de.htwg.modprog.cubic.controller.CubicController
 import scala.swing.Reactor
 import de.htwg.modprog.cubic.controller.CubicController
-import de.htwg.modprog.cubic.controller.CubicController
 import de.htwg.modprog.cubic.controller.FieldChanged
 import java.io.File
 import scala.io.Source._
 import de.htwg.modprog.cubic.controller.GameCreated
+import scala.util.Try
 
 class Tui(var controller: CubicController) extends Reactor {
   
@@ -21,7 +21,7 @@ class Tui(var controller: CubicController) extends Reactor {
   val defaultNamePrefix = "Player"
   val intro = loadString("/tui_intro.txt")
   val menu = loadString("/tui_menu.txt")
-  val symbols = Seq('X', 'O')
+  val symbols = Seq('X', 'O', 'T', 'Z', 'H')
   var symbolMapping = Map[String, Char]()
   
   reactions += {
@@ -32,14 +32,14 @@ class Tui(var controller: CubicController) extends Reactor {
   def processInputLine(input: String) = {
     var continue = true
     input match {
-      case "a" => controller.createQuickVersusGame("", "")
-      case "b" => controller.createQuickCpuGame("")
-      case "c" => controller.createCustomGame(Seq(("", false)), 4)
+      case "a" => controller.createQuickVersusGame
+      case "b" => controller.createQuickCpuGame
+      case "c" => controller.createCustomGame(askForPlayers(2, Nil), askForSize(2 to 10))
       case "r" => controller.restart
       case "q" => continue = false
-      case _ => {
+      case _ => if(!controller.hasWinner) {
         input.toList.filter(c => c != ' ').map(c => c.toString.toInt) match {
-          case x :: y :: z :: Nil => controller.occupyField(x, y, z)
+          case x :: y :: z :: Nil => controller.occupyField(x - 1, y - 1, z - 1)
           case _ => println("False Input")
         }
       }
@@ -57,22 +57,11 @@ class Tui(var controller: CubicController) extends Reactor {
     drawFullUi
   }
   
-  def drawFullUi = {
-    drawHeader
-    drawGame
-    drawHud
-    drawCommands2
-  }
- 
-  def drawHeader = {
-    println(intro)
-    println(menu)
-  }
-  
-  def drawHud = println("Turn: " + controller.currentPlayer + ", move: " + controller.moveCount)
-
-  def drawCommands2 = println("Enter xyz, where each is in the range 0 to " + (controller.boardSize - 1))
-  
+  def drawHeader = println(intro)
+  def drawMenu = println(menu)
+  def drawStatus = println(" " + controller.statusText + nl)  
+  def drawHud = println(" " + controller.currentPlayer._1  + ", it's your turn!")
+  def drawCommands = println(" Enter xyz, where each is in the range from 1 to " + controller.boardSize)
   def drawGame = {
     def line(acc: String, x: Int, y: Int, z: Int): String = {
       if(x < n) line(acc + getField(x, y, z), x + 1, y, z) else acc + "/" + nl
@@ -94,25 +83,38 @@ class Tui(var controller: CubicController) extends Reactor {
     println(cube("", 0))
   }
   
-  def askConfig = {
-    
+  def drawFullUi = {
+    drawHeader
+    drawMenu
+    drawGame
+    drawStatus
+    if(!controller.hasWinner) {
+      drawHud
+      drawCommands
+    }
   }
   
-  def askForPlayers(pc: Int, acc: List[String]): List[String] = pc match {
+  def askForPlayers(pc: Int, acc: List[(String, Boolean)]): List[(String, Boolean)] = pc match {
     case pc if pc > 0 => {
-      val defaultName = defaultNamePrefix + " " + acc.length + 1
-      println("Enter name of " + defaultName + " (defaults to: " + defaultName + ")")
-      val in = readLine().trim
-      askForPlayers(pc - 1, (if (in == "") defaultName else in) :: acc)
+      println("Setup Player " + (acc.length + 1))
+      val name  = ask("Enter name (leave empty for default)")
+      val isCpu = ask("Is CPU? (y/n)") == "y"
+      askForPlayers(pc - 1, (name, isCpu) :: acc)
     }
     case _ => acc reverse
   }
   
-  def askForBoard = {
-    println("Enter size of board (defaults to: " + defaultGameSize + ")")
-    val in = readLine().trim
-    //if(in == "")
-    ???
+  def askForSize(r: Range): Int = {
+    val size = ask("Enter size of board, (" + r + ")")
+    Try(size.toInt).toOption match {
+      case Some(i: Int) if r.contains(i) => i
+      case _ => askForSize(r)
+    }
+  }
+  
+  def ask(q: String) = {
+    println(q)
+    readLine trim
   }
   
   def loadString(path: String) = fromURL(getClass.getResource(path)).mkString
@@ -120,7 +122,7 @@ class Tui(var controller: CubicController) extends Reactor {
   def assignSymbols(names: List[String], sym: Seq[Char], m: Map[String, Char]): Map[String, Char] = {
     names match {
       case name :: tail => { 
-        val symbol = if(!sym.isEmpty) sym.take(1)(0) else '0' // 0 = symbols depleted
+        val symbol = if(!sym.isEmpty) sym.take(1)(0) else '?' // ? = symbols depleted
         assignSymbols(tail, sym.drop(1), m + (name -> symbol))
       }
       case Nil => m

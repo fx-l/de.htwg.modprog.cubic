@@ -3,18 +3,20 @@ package de.htwg.modprog.cubic.model.impl
 import de.htwg.modprog.cubic.model.Player
 import de.htwg.modprog.cubic.model.PlayerBin
 
-class CubicPlayerBin private(val players: List[Player]) extends PlayerBin {
-  val current = players.head
-  val waiting = players.tail
-  def iterate = new CubicPlayerBin(waiting :+ current)
-  def playerCount = players.length
+class CubicPlayerBin private(
+    val players: List[Player],
+    val current: Player,
+    val waiting: List[Player]) extends PlayerBin {
+  override def iterate = new CubicPlayerBin(players, waiting.head, waiting.drop(1) :+ current)
+  override def reset = new CubicPlayerBin(players, players.head, players.tail)
+  override def playerCount = players.length
 }
 
 object CubicPlayerBin {
   def apply(players: Seq[Player]) = {
     require(players.length > 0)
-    val namedPlayers = players.map(defaultName(_)).toList
-    new CubicPlayerBin(disambiguate(namedPlayers))
+    val namedPlayers = disambiguate(players.map(defaultName(_)).toList)
+    new CubicPlayerBin(namedPlayers, namedPlayers.head, namedPlayers.tail)
   }
   def defaultName(p: Player) = (p.name, p.isCpu) match {
       case (name, _) if !name.trim.isEmpty => p

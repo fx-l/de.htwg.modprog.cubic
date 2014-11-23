@@ -11,7 +11,7 @@ class CubicGame private(val board: Board, val pb: PlayerBin) extends Game {
   override def moveCount = board.moves
   override def isFieldOccupied(x: Int, y: Int, z: Int) = board.fieldIsOccupied(x, y, z)
   override def field(x: Int, y: Int, z: Int) = board.field(x, y, z)
-  override def restart = new CubicGame(CubicBoard(size), pb)
+  override def restart = new CubicGame(CubicBoard(size), pb.reset)
   override def create(players: Seq[Player], size: Int) = CubicGame(players, size)
   override def toString = "move: " + moveCount + ", current player: " + currentPlayer + ", others: " + waitingPlayers
   override def occupyField(x: Int, y: Int, z: Int) = {

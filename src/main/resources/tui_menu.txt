@@ -1,5 +1,5 @@
-  Menu      - create quick game, Player vs. Player  [a]
-                                 Player vs. CPU     [b]
-            - create customized game                [c] 
-            - restart with current settings         [r]
+ Menu      - create quick game, Player vs. Player  [a]
+                                Player vs. CPU     [b]
+           - create customized game                [c] 
+           - restart with current settings         [r]
  

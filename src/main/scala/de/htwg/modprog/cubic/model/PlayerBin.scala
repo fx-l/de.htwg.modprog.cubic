@@ -6,4 +6,5 @@ trait PlayerBin {
   def waiting: List[Player]
   def playerCount: Int
   def iterate: PlayerBin
+  def reset: PlayerBin
 }

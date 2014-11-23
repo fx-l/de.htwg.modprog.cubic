@@ -7,7 +7,7 @@ import de.htwg.modprog.cubic.model.impl.CubicGame
 object Cubic {
   val controller = new CubicController(CubicGame())
   val tui = new Tui(controller)
-  controller.createQuickVersusGame("Player 1", "Player 2")
+  controller.createQuickVersusGame
   def main(args: Array[String]) {
     while (tui.processInputLine(readLine())) {}
   }
