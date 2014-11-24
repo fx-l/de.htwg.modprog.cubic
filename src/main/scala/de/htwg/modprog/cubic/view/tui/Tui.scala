@@ -39,7 +39,7 @@ class Tui(var controller: CubicController) extends Reactor {
       case "q" => continue = false
       case _ => if(!controller.hasWinner) {
         input.toList.filter(c => c != ' ').map(c => c.toString.toInt) match {
-          case x :: y :: z :: Nil => controller.occupyField(x - 1, y - 1, z - 1)
+          case (x: Int) :: (y: Int) :: (z: Int) :: Nil => controller.occupyField(x - 1, y - 1, z - 1)
           case _ => println("False Input")
         }
       }
