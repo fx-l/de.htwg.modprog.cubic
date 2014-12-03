@@ -15,6 +15,7 @@ import scalafx.scene.transform.Rotate
 import scalafx.scene.SceneAntialiasing
 import scalafx.scene.paint.{ Color, PhongMaterial }
 import scalafx.scene.shape.{ Sphere, Box }
+import scalafx.geometry.Insets
 
 object Gui extends JFXApp {
 
@@ -25,10 +26,9 @@ object Gui extends JFXApp {
     title = "Cubic"
     scene = new Scene(900, 900, true, SceneAntialiasing.Balanced) {
       root = new BorderPane {
-        top = new VBox {
-          content = List(
-            createMenus())
-        }
+        top = createMenu
+        center = createGameWindow
+        bottom = createStatusBar
       }
       val shapes = new Group
       shapes.children = createSpheres
@@ -53,50 +53,8 @@ object Gui extends JFXApp {
       addMouseInteraction(this, shapes)
     }
   }
-  private def createMenus() = new MenuBar {
-    menus = List(
-      new Menu("File") {
-        items = List(new MenuItem("Restart") {
-          accelerator = KeyCombination.keyCombination("r")
-          onAction = {
-            e: ActionEvent => println(e.eventType + " Restart... clicked!")
-          }
-        }, new Menu("New Game") {
-          items = List(new MenuItem("Player vs. Player") {
-            accelerator = KeyCombination.keyCombination("a")
-            onAction = {
-              e: ActionEvent => println(e.eventType + " Player vs. Player... clicked!")
-            }
-          }, new MenuItem("Player vs. Computer") {
-            accelerator = KeyCombination.keyCombination("b")
-            onAction = {
-              e: ActionEvent => println(e.eventType + " Player vs. Computer... clicked!")
-            }
-          }, new MenuItem("Custom Game") {
-            accelerator = KeyCombination.keyCombination("c")
-            onAction = {
-              e: ActionEvent => println(e.eventType + " New... clicked!")
-            }
-          })
-        },
-          new MenuItem("How to play") {
-            accelerator = KeyCombination.keyCombination("h")
-            onAction = {
-             e: ActionEvent => println(e.eventType + " How to play... clicked!")
-            }
-          }, new MenuItem("About") {
-            accelerator = KeyCombination.keyCombination("i")
-            onAction = {
-              e: ActionEvent => println(e.eventType + " About... clicked!")
-            }
-          }, new MenuItem("Quit") {
-            accelerator = KeyCombination.keyCombination("q")
-            onAction = {
-              e: ActionEvent => System.exit(0)
-            }
-          })
-      })
-  }
+  
+  
   /** Add mouse interaction to a scene, rotating given node. */
   private def addMouseInteraction(scene: Scene, group: Group) {
     val angleY = DoubleProperty(-50)
@@ -157,4 +115,79 @@ object Gui extends JFXApp {
         id = x + "-" + y + "-" + z
       })
   }
+  
+  // creategame window
+  def createGameWindow = {
+    new VBox {
+          content = new Label {
+            text = "Game will be here"
+          }
+    }
+  }
+  
+  // a method for creating the status bar
+  def createStatusBar = {
+    new VBox {
+          padding = Insets(14)
+          content = new Label {
+            text = "Status Messages go here"
+            id = "statusLabel"
+          }
+    }
+  }
+  
+  // a method for building the menu
+  def createMenu = new VBox {
+          content = List(new MenuBar {
+    menus = List(
+      new Menu("Game") {
+        items = List(new Menu("New Game") {
+          items = List(new MenuItem("Player vs. Player") {
+            accelerator = KeyCombination.keyCombination("a")
+            onAction = {
+              e: ActionEvent => println(e.eventType + " Player vs. Player... clicked!")
+            }
+          }, new MenuItem("Player vs. Computer") {
+            accelerator = KeyCombination.keyCombination("b")
+            onAction = {
+              e: ActionEvent => println(e.eventType + " Player vs. Computer... clicked!")
+            }
+          }, new MenuItem("Custom Game") {
+            accelerator = KeyCombination.keyCombination("c")
+            onAction = {
+              e: ActionEvent => println(e.eventType + " New... clicked!")
+            }
+          })
+        },
+        new MenuItem("Restart") {
+          accelerator = KeyCombination.keyCombination("r")
+          onAction = {
+            e: ActionEvent => println(e.eventType + " Restart... clicked!")
+          }
+        },
+        new MenuItem("Quit") {
+          accelerator = KeyCombination.keyCombination("q")
+          onAction = {
+            e: ActionEvent => System.exit(0)
+            }
+          }
+        )
+    },
+    new Menu("Info") {
+        items = List(new MenuItem("How to play") {
+            accelerator = KeyCombination.keyCombination("h")
+            onAction = {
+             e: ActionEvent => println(e.eventType + " How to play... clicked!")
+            }
+          }, new MenuItem("About") {
+            accelerator = KeyCombination.keyCombination("i")
+            onAction = {
+              e: ActionEvent => println(e.eventType + " About... clicked!")
+            }
+          }
+          )
+      }  
+    )
+  })
+        }
 }
