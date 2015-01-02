@@ -1,70 +1,133 @@
 package de.htwg.modprog.cubic.view.gui
 
-import scalafx.Includes._
+import scala.swing.Reactor
+
+import de.htwg.modprog.cubic.controller.CubicController
+import de.htwg.modprog.cubic.controller.FieldChanged
+import de.htwg.modprog.cubic.controller.GameCreated
+import de.htwg.modprog.cubic.util.Util
+import javafx.scene.control.{ToggleButton => JfxToggleBtn}
+import scalafx.Includes.eventClosureWrapperWithParam
+import scalafx.Includes.jfxActionEvent2sfx
+import scalafx.Includes.jfxMouseEvent2sfx
+import scalafx.Includes.observableList2ObservableBuffer
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
-import scalafx.event.{ Event, ActionEvent }
-import scalafx.scene.control.MenuItem._
-import scalafx.scene.control._
-import scalafx.scene.input.KeyCombination
-import scalafx.scene.layout._
-import scalafx.scene._
-import scalafx.scene.transform._
+import scalafx.application.Platform
 import scalafx.beans.property.DoubleProperty
-import scalafx.scene.input.MouseEvent
-import scalafx.scene.transform.Rotate
-import scalafx.scene.SceneAntialiasing
-import scalafx.scene.paint.{ Color, PhongMaterial }
-import scalafx.scene.shape._
-import scalafx.geometry.Insets
+import scalafx.beans.property.DoubleProperty.sfxDoubleProperty2jfx
 import scalafx.beans.property.ReadOnlyDoubleProperty
-import scalafx.scene.text.Font
-import scalafx.scene.paint.{ Stops, LinearGradient }
-import scalafx.scene.text.Text
-import scalafx.scene.effect.DropShadow
-import scalafx.stage.Stage
-import scalafx.geometry.Pos
-import scalafx.scene.control.{ ContentDisplay, Label }
+import scalafx.beans.property.ReadOnlyDoubleProperty.sfxReadOnlyDoubleProperty2jfx
 import scalafx.collections.ObservableBuffer
-import javafx.scene.control.{ToggleButton => JfxToggleBtn}
+import scalafx.event.ActionEvent
+import scalafx.geometry.Insets
+import scalafx.geometry.Pos
+import scalafx.scene.Group
+import scalafx.scene.PerspectiveCamera
+import scalafx.scene.Scene
+import scalafx.scene.SceneAntialiasing
+import scalafx.scene.SubScene
+import scalafx.scene.control._
+import scalafx.scene.effect.DropShadow
+import scalafx.scene.input.KeyCombination
+import scalafx.scene.input.MouseEvent
+import scalafx.scene.layout._
+import scalafx.scene.paint._
+import scalafx.scene.shape.DrawMode
+import scalafx.scene.shape.Sphere
+import scalafx.scene.text.Text
+import scalafx.scene.transform.Rotate
+import scalafx.scene.transform.Translate
+import scalafx.scene.transform.Translate.sfxTranslate2jfx
+import scalafx.stage.Stage
 
-object Gui extends JFXApp {
+object Gui extends JFXApp with Reactor {
 
-  val gameSize = 4
-  val sphereSize = 3
+  val occupiedSphereSize = 3
+  val highlightedSphereSize = 4
+  val emptySphereSize = 0.8
   val spacer = 12
-  val sideLength = gameSize * sphereSize + (gameSize - 1) * spacer
   val zoomOutFactor = 3
   val horizontalCorrectionFactor = 0.08F;
-
-  val stringsBoardSize = ObservableBuffer(
-    "2 x 2 x 2", "3 x 3 x 3", "4 x 4 x 4",
-    "5 x 5 x 5", "6 x 6 x 6", "7 x 7 x 7",
-    "8 x 8 x 8")
-
-  val togglePl1 = new ToggleGroup {
-    selectedToggle.onChange(
-      (_, oldValue, newValue) => {
-        println("Player 1: " + newValue.asInstanceOf[JfxToggleBtn].getText)
-      })
+  val sphereIdPrefix = "sphere"
+  val highlightMat = new PhongMaterial {
+    diffuseColor = Color.Yellow
+    specularColor = Color.White
+    specularPower = 20.0
+  }
+  val defaultMat = new PhongMaterial(Color.LightSteelBlue)
+  val symbols = Seq(new PhongMaterial(Color.LawnGreen), new PhongMaterial(Color.DeepPink))
+  var symbolMapping = Map[String, Material]()
+  def coordsToId(x: Int, y: Int, z: Int) = sphereIdPrefix + "-" + x + "-" + y + "-" + z
+  def gameSize = controller.boardSize
+  def sideLength = gameSize * occupiedSphereSize + (gameSize - 1) * spacer
+  
+  private var controller: CubicController = _
+  
+  def registerController(controller: CubicController) {
+    this.controller = controller;
+    listenTo(controller)
+    reactions += {
+      case e: GameCreated => onGameCreated
+      case e: FieldChanged => onGameUpdated
+    }
   }
   
-  val togglePl2 = new ToggleGroup {
-    selectedToggle.onChange(
-      (_, oldValue, newValue) => {
-        println("Player 2: " + newValue.asInstanceOf[JfxToggleBtn].getText)
-      })
+  def onGameCreated = {
+    val nameList = controller.players.map{ case(name, _) => name }.toList
+    symbolMapping = Util.assignSymbols(nameList, symbols, new PhongMaterial(Color.Red), Map[String, Material]())
+    Platform.runLater {
+      val subScene = getSubScene
+      val basicContent = createBasic3dContent
+      subScene.content = basicContent
+      subScene.camera = createCamera
+      addMouseInteraction(subScene, basicContent)
+    }
+  }
+  
+  def onGameUpdated = {
+    Platform.runLater {
+      update3dContent
+    }
+  }
+  
+  def update3dContent = {
+    for (x <- 0 until gameSize; y <- 0 until gameSize; z <- 0 until gameSize) {
+      val sphere = getSphereById(coordsToId(x,y,z))
+      val (player, highlight) = controller.field(x, y, z)
+      sphere.material = player match {
+        case Some(name: String) => if(highlight) highlightMat else symbolMapping(name)
+        case None => defaultMat
+      }
+      sphere.radius = player match {
+        case Some(_) => if(highlight) highlightedSphereSize else occupiedSphereSize
+        case None => emptySphereSize
+      }
+    }
+  }
+  
+  def getSphereById(id: String) = {
+    val subScene = getSubScene    
+    val content = subScene.getChildren(0)
+    val javaSphere = content.lookup("#" + id).asInstanceOf[javafx.scene.shape.Sphere]
+    new Sphere(javaSphere)
+  }
+  
+  def getSubScene = {
+    val javaSubScene = stage.scene().lookup("#sub").asInstanceOf[javafx.scene.SubScene]
+    new SubScene(javaSubScene)
+  }
+  
+  def setStatusText(statusText: String) {
+    
   }
 
   stage = new PrimaryStage {
     title = "Cubic"
     scene = new Scene(900, 900, true, SceneAntialiasing.Balanced) {
-
+      fill = Color.Black
       var tmpw = this.width
       var tmph = this.height
-
-      fill = Color.Black
-
       root = new BorderPane {
         fill = Color.Black
         top = new VBox {
@@ -81,22 +144,24 @@ object Gui extends JFXApp {
   def createView(boundWidth: ReadOnlyDoubleProperty, boundHeight: ReadOnlyDoubleProperty): BorderPane = {
     new BorderPane {
       center = new SubScene(boundWidth.get(), boundHeight.get(), true, SceneAntialiasing.Balanced) {
+        id = "sub"
         fill = Color.Black
-
-        val spheres = new Group
-        spheres.children = createSpheres(gameSize, sphereSize, spacer)
-        content = spheres
-
-        camera = new PerspectiveCamera(true) {
-          farClip = sideLength + zoomOutFactor * sideLength
-          transforms += (
-            new Translate(0, sideLength * horizontalCorrectionFactor, -sideLength * zoomOutFactor))
-        }
         this.width.bind(boundWidth.add(0))
         this.height.bind(boundHeight.add(0))
-        addMouseInteraction(this, spheres)
       }
     }
+  }
+  
+  def createBasic3dContent = {
+    val spheres = new Group
+    spheres.children = createSpheres(controller.boardSize, emptySphereSize, spacer)
+    spheres
+  }
+  
+  def createCamera = new PerspectiveCamera(true) {
+    farClip = sideLength + zoomOutFactor * sideLength
+    transforms += (
+        new Translate(0, sideLength * horizontalCorrectionFactor, -sideLength * zoomOutFactor))
   }
 
   // a method for creating the status bar
@@ -118,17 +183,17 @@ object Gui extends JFXApp {
     }
   }
 
-  def createSpheres(gameSize: Int, sphereSize: Int, spacer: Int) = {
+  def createSpheres(gameSize: Int, sphereSize: Double, spacer: Int) = {
     def coord(value: Int) = value * spacer - (gameSize - 1) * spacer / 2
     for (x <- 0 until gameSize; y <- 0 until gameSize; z <- 0 until gameSize)
       yield (
       new Sphere(sphereSize) {
-        material = new PhongMaterial(Color.Red)
+        material = defaultMat
         drawMode = DrawMode.Fill
         translateX = coord(x)
         translateY = coord(y)
         translateZ = coord(z)
-        id = x + "-" + y + "-" + z
+        id = coordsToId(x,y,z)
       })
   }
 
@@ -167,12 +232,12 @@ object Gui extends JFXApp {
 
       // If picked on a Node, place green marker at the location of the pick
       pickResult.intersectedNode match {
-        case Some(n) => {
-          println("Picked node: '" + n.id() + "'")
-          val p = pickResult.intersectedPoint
-          group.content += createMarker(x = p.x + n.translateX(), y = p.y + n.translateY(), z = p.z + n.translateZ())
+        case Some(n) if n.id().startsWith(sphereIdPrefix) => {
+          //println("Picked sphere: '" + n.id() + "'")
+          val coords = n.id().split ("[^0-9]").filter(_.length > 0).map (_.toInt) 
+          controller.occupyField(coords(0), coords(1), coords(2))
         }
-        case None => println("Picked nothing.")
+        case _ => //println("Picked nothing or not a sphere at least.")
       }
     }
 
@@ -195,28 +260,22 @@ object Gui extends JFXApp {
       menus = List(
         new Menu("Game") {
           items = List(new Menu("New Game") {
-            items = List(new MenuItem("Player vs. Player") {
-              accelerator = KeyCombination.keyCombination("a")
+            items = List(new MenuItem("Quickstart") {
+              accelerator = KeyCombination.keyCombination("s")
               onAction = {
-                e: ActionEvent => println(e.eventType + " Player vs. Player... clicked!")
+                e: ActionEvent => controller.createQuickVersusGame
               }
-            }, new MenuItem("Player vs. Computer") {
-              accelerator = KeyCombination.keyCombination("b")
-              onAction = {
-                e: ActionEvent => println(e.eventType + " Player vs. Computer... clicked!")
-              }
-            }, new MenuItem("Custom Game") {
+            }, new MenuItem("Custom Setup") {
               accelerator = KeyCombination.keyCombination("c")
               onAction = {
-
                 e: ActionEvent => showCustomGameDialog()
               }
             })
           },
-            new MenuItem("Restart") {
+            new MenuItem("Restart (curr. setup)") {
               accelerator = KeyCombination.keyCombination("r")
               onAction = {
-                e: ActionEvent => println(e.eventType + " Restart... clicked!")
+                e: ActionEvent => controller.restart
               }
             },
             new MenuItem("Quit") {
@@ -225,19 +284,6 @@ object Gui extends JFXApp {
                 e: ActionEvent => System.exit(0)
               }
             })
-        },
-        new Menu("Info") {
-          items = List(new MenuItem("How to play") {
-            accelerator = KeyCombination.keyCombination("h")
-            onAction = {
-              e: ActionEvent => println(e.eventType + " How to play... clicked!")
-            }
-          }, new MenuItem("About") {
-            accelerator = KeyCombination.keyCombination("i")
-            onAction = {
-              e: ActionEvent => println(e.eventType + " About... clicked!")
-            }
-          })
         })
     })
   }
@@ -296,6 +342,25 @@ object Gui extends JFXApp {
       }
     }
     dialogStage.showAndWait()
+  }
+  
+    val stringsBoardSize = ObservableBuffer(
+    "2 x 2 x 2", "3 x 3 x 3", "4 x 4 x 4",
+    "5 x 5 x 5", "6 x 6 x 6", "7 x 7 x 7",
+    "8 x 8 x 8")
+
+  val togglePl1 = new ToggleGroup {
+    selectedToggle.onChange(
+      (_, oldValue, newValue) => {
+        println("Player 1: " + newValue.asInstanceOf[JfxToggleBtn].getText)
+      })
+  }
+  
+  val togglePl2 = new ToggleGroup {
+    selectedToggle.onChange(
+      (_, oldValue, newValue) => {
+        println("Player 2: " + newValue.asInstanceOf[JfxToggleBtn].getText)
+      })
   }
 
 }

@@ -1,13 +1,12 @@
 package de.htwg.modprog.cubic.view.tui
 
-import de.htwg.modprog.cubic.controller.CubicController
+import scala.io.Source.fromURL
 import scala.swing.Reactor
+import scala.util.Try
+
 import de.htwg.modprog.cubic.controller.CubicController
 import de.htwg.modprog.cubic.controller.FieldChanged
-import java.io.File
-import scala.io.Source._
 import de.htwg.modprog.cubic.controller.GameCreated
-import scala.util.Try
 
 class Tui(var controller: CubicController) extends Reactor {
   
@@ -21,7 +20,7 @@ class Tui(var controller: CubicController) extends Reactor {
   val defaultNamePrefix = "Player"
   val intro = loadString("/tui_intro.txt")
   val menu = loadString("/tui_menu.txt")
-  val symbols = Seq('X', 'O', 'T', 'Z', 'H')
+  val symbols = Seq('X', 'O', 'T', 'H')
   var symbolMapping = Map[String, Char]()
   
   reactions += {
