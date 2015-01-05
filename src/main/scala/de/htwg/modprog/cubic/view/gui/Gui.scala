@@ -40,6 +40,7 @@ import scalafx.scene.transform.Rotate
 import scalafx.scene.transform.Translate
 import scalafx.scene.transform.Translate.sfxTranslate2jfx
 import scalafx.stage.Stage
+import scalafx.util.StringConverter
 
 object Gui extends JFXApp with Reactor {
 
@@ -58,6 +59,7 @@ object Gui extends JFXApp with Reactor {
   val defaultMat = new PhongMaterial(Color.LightSteelBlue)
   val symbols = Seq(new PhongMaterial(Color.LawnGreen), new PhongMaterial(Color.DeepPink))
   var symbolMapping = Map[String, Material]()
+  val configMaxGameSize = 20
   def coordsToId(x: Int, y: Int, z: Int) = sphereIdPrefix + "-" + x + "-" + y + "-" + z
   def gameSize = controller.boardSize
   def sideLength = gameSize * occupiedSphereSize + (gameSize - 1) * spacer
@@ -304,35 +306,25 @@ object Gui extends JFXApp with Reactor {
               new Label { text = "Please enter names" },
               new HBox {
                 spacing = 10
-                content = List(new Label { text = "Player 1: " }, new TextField { promptText = "Player 1" }, new ToggleButton {
-                  minWidth = 100
-                  text = "Human"
-                  selected = true  
-                  toggleGroup = togglePl1
-                }, new ToggleButton {
-                  minWidth = 100
-                  text = "CPU"
-                  toggleGroup = togglePl1
-                })
+                content = List(new Label { text = "Player 1: " }, new TextField { promptText = "Player 1" })
               }, new HBox {
                 spacing = 10
-                content = List(new Label { text = "Player 2: " }, new TextField { promptText = "Player 2" }, new ToggleButton {
-                  minWidth = 100
-                  text = "Human"
-                  toggleGroup = togglePl2
-                }, new ToggleButton {
-                  minWidth = 100
-                  text = "CPU"
-                  selected = true    
-                  toggleGroup = togglePl2
-                })
-              }, new Label { text = "Edit or choose a board size"}, new HBox {
+                content = List(new Label { text = "Player 2: " }, new TextField { promptText = "Player 2" })
+              }, new Label { text = "Choose a board size"}, new HBox {
                 spacing = 10
-                content = List(new Label { text = "Board size:" }, new ComboBox[String] {
-                  maxWidth = 200
-                  editable = true
-                  items = stringsBoardSize
-                })
+                val slider = new Slider{
+                  min = 2
+                  max = 20
+                  value = 4
+                  majorTickUnit = 1
+                  showTickLabels = true
+                  snapToTicks = true
+                  minorTickCount = 0
+                }
+                val sizeOutput = new Label {
+                  text <== slider.value.asString("%f")
+                }
+                content = List(new Label { text = "Board size:" }, slider, sizeOutput)
               }, new Button { text = "Start Game"
                 onAction = {
                 e: ActionEvent => System.exit(0)
@@ -342,25 +334,6 @@ object Gui extends JFXApp with Reactor {
       }
     }
     dialogStage.showAndWait()
-  }
-  
-    val stringsBoardSize = ObservableBuffer(
-    "2 x 2 x 2", "3 x 3 x 3", "4 x 4 x 4",
-    "5 x 5 x 5", "6 x 6 x 6", "7 x 7 x 7",
-    "8 x 8 x 8")
-
-  val togglePl1 = new ToggleGroup {
-    selectedToggle.onChange(
-      (_, oldValue, newValue) => {
-        println("Player 1: " + newValue.asInstanceOf[JfxToggleBtn].getText)
-      })
-  }
-  
-  val togglePl2 = new ToggleGroup {
-    selectedToggle.onChange(
-      (_, oldValue, newValue) => {
-        println("Player 2: " + newValue.asInstanceOf[JfxToggleBtn].getText)
-      })
   }
 
 }

@@ -13,8 +13,8 @@ object Cubic {
   
   def main(args: Array[String]) {
     startFxGui(controller)
-    while (tui.processInputLine(readLine())) {}
-    System.exit(0); // explicit exit needed to close ScalaFX Thread
+    //while (tui.processInputLine(readLine())) {}
+    //System.exit(0); // explicit exit needed to close ScalaFX Thread
   }
   
   def startFxGui(controller: CubicController) = {
