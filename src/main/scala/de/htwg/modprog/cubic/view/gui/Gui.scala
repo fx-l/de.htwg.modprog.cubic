@@ -6,7 +6,7 @@ import de.htwg.modprog.cubic.controller.CubicController
 import de.htwg.modprog.cubic.controller.FieldChanged
 import de.htwg.modprog.cubic.controller.GameCreated
 import de.htwg.modprog.cubic.util.Util
-import javafx.scene.control.{ToggleButton => JfxToggleBtn}
+import javafx.scene.control.{ ToggleButton => JfxToggleBtn }
 import scalafx.Includes.eventClosureWrapperWithParam
 import scalafx.Includes.jfxActionEvent2sfx
 import scalafx.Includes.jfxMouseEvent2sfx
@@ -63,9 +63,22 @@ object Gui extends JFXApp with Reactor {
   def coordsToId(x: Int, y: Int, z: Int) = sphereIdPrefix + "-" + x + "-" + y + "-" + z
   def gameSize = controller.boardSize
   def sideLength = gameSize * occupiedSphereSize + (gameSize - 1) * spacer
-  
+
+  val comboBoxBoardSize = new ComboBox[String] {
+    maxWidth = 200
+    editable = true
+    items = ObservableBuffer(
+      "2 x 2 x 2", "3 x 3 x 3", "4 x 4 x 4",
+      "5 x 5 x 5", "6 x 6 x 6", "7 x 7 x 7",
+      "8 x 8 x 8")
+    value = "4 x 4 x 4"
+  }
+
+  val textFieldPl1 = new TextField { promptText = "Player 1" }
+  val textFieldPl2 = new TextField { promptText = "Player 2" }
+
   private var controller: CubicController = _
-  
+
   def registerController(controller: CubicController) {
     this.controller = controller;
     listenTo(controller)
@@ -74,9 +87,9 @@ object Gui extends JFXApp with Reactor {
       case e: FieldChanged => onGameUpdated
     }
   }
-  
+
   def onGameCreated = {
-    val nameList = controller.players.map{ case(name, _) => name }.toList
+    val nameList = controller.players.map { case (name, _) => name }.toList
     symbolMapping = Util.assignSymbols(nameList, symbols, new PhongMaterial(Color.Red), Map[String, Material]())
     Platform.runLater {
       val subScene = getSubScene
@@ -86,42 +99,42 @@ object Gui extends JFXApp with Reactor {
       addMouseInteraction(subScene, basicContent)
     }
   }
-  
+
   def onGameUpdated = {
     Platform.runLater {
       update3dContent
     }
   }
-  
+
   def update3dContent = {
     for (x <- 0 until gameSize; y <- 0 until gameSize; z <- 0 until gameSize) {
-      val sphere = getSphereById(coordsToId(x,y,z))
+      val sphere = getSphereById(coordsToId(x, y, z))
       val (player, highlight) = controller.field(x, y, z)
       sphere.material = player match {
-        case Some(name: String) => if(highlight) highlightMat else symbolMapping(name)
+        case Some(name: String) => if (highlight) highlightMat else symbolMapping(name)
         case None => defaultMat
       }
       sphere.radius = player match {
-        case Some(_) => if(highlight) highlightedSphereSize else occupiedSphereSize
+        case Some(_) => if (highlight) highlightedSphereSize else occupiedSphereSize
         case None => emptySphereSize
       }
     }
   }
-  
+
   def getSphereById(id: String) = {
-    val subScene = getSubScene    
+    val subScene = getSubScene
     val content = subScene.getChildren(0)
     val javaSphere = content.lookup("#" + id).asInstanceOf[javafx.scene.shape.Sphere]
     new Sphere(javaSphere)
   }
-  
+
   def getSubScene = {
     val javaSubScene = stage.scene().lookup("#sub").asInstanceOf[javafx.scene.SubScene]
     new SubScene(javaSubScene)
   }
-  
+
   def setStatusText(statusText: String) {
-    
+
   }
 
   stage = new PrimaryStage {
@@ -153,17 +166,17 @@ object Gui extends JFXApp with Reactor {
       }
     }
   }
-  
+
   def createBasic3dContent = {
     val spheres = new Group
     spheres.children = createSpheres(controller.boardSize, emptySphereSize, spacer)
     spheres
   }
-  
+
   def createCamera = new PerspectiveCamera(true) {
     farClip = sideLength + zoomOutFactor * sideLength
     transforms += (
-        new Translate(0, sideLength * horizontalCorrectionFactor, -sideLength * zoomOutFactor))
+      new Translate(0, sideLength * horizontalCorrectionFactor, -sideLength * zoomOutFactor))
   }
 
   // a method for creating the status bar
@@ -195,7 +208,7 @@ object Gui extends JFXApp with Reactor {
         translateX = coord(x)
         translateY = coord(y)
         translateZ = coord(z)
-        id = coordsToId(x,y,z)
+        id = coordsToId(x, y, z)
       })
   }
 
@@ -236,7 +249,7 @@ object Gui extends JFXApp with Reactor {
       pickResult.intersectedNode match {
         case Some(n) if n.id().startsWith(sphereIdPrefix) => {
           //println("Picked sphere: '" + n.id() + "'")
-          val coords = n.id().split ("[^0-9]").filter(_.length > 0).map (_.toInt) 
+          val coords = n.id().split("[^0-9]").filter(_.length > 0).map(_.toInt)
           controller.occupyField(coords(0), coords(1), coords(2))
         }
         case _ => //println("Picked nothing or not a sphere at least.")
@@ -292,6 +305,7 @@ object Gui extends JFXApp with Reactor {
 
   private def showCustomGameDialog() {
     val dialogStage = new Stage {
+      outer =>
       title = "Custom Game"
       width = 500
       height = 300
@@ -306,29 +320,24 @@ object Gui extends JFXApp with Reactor {
               new Label { text = "Please enter names" },
               new HBox {
                 spacing = 10
-                content = List(new Label { text = "Player 1: " }, new TextField { promptText = "Player 1" })
+                content = List(new Label { text = "Player 1: " }, textFieldPl1)
               }, new HBox {
                 spacing = 10
-                content = List(new Label { text = "Player 2: " }, new TextField { promptText = "Player 2" })
-              }, new Label { text = "Choose a board size"}, new HBox {
+                content = List(new Label { text = "Player 2: " }, textFieldPl2)
+              }, new Label { text = "Choose a board size" }, new HBox {
                 spacing = 10
-                val slider = new Slider{
-                  min = 2
-                  max = 20
-                  value = 4
-                  majorTickUnit = 1
-                  showTickLabels = true
-                  snapToTicks = true
-                  minorTickCount = 0
-                }
-                val sizeOutput = new Label {
-                  text <== slider.value.asString("%f")
-                }
-                content = List(new Label { text = "Board size:" }, slider, sizeOutput)
-              }, new Button { text = "Start Game"
+                content = List(new Label { text = "Board size:" }, comboBoxBoardSize)
+              }, new Button {
+                text = "Start Game"
                 onAction = {
-                e: ActionEvent => System.exit(0)
-              }})
+                  e: ActionEvent =>
+                    val player1 = textFieldPl1.getText()
+                    val player2 = textFieldPl2.getText()
+                    val boardSize = comboBoxBoardSize.getValue().charAt(0).asDigit
+                    controller.createCustomGame(Seq((player1, false), (player2, false)), boardSize)
+                    outer.close
+                }
+              })
           }
         }
       }
