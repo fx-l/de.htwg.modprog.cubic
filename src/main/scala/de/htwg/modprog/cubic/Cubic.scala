@@ -9,19 +9,19 @@ object Cubic {
   
   val controller = new CubicController(CubicGame())
   val tui = new Tui(controller)
+  val gui = new JFXGui(controller)
   controller.createQuickVersusGame
   
   def main(args: Array[String]) {
-    startFxGui(controller)
+    startJFXGui(gui)
     while (tui.processInputLine(readLine())) {}
     System.exit(0); // explicit exit needed to close ScalaFX Thread
   }
   
-  def startFxGui(controller: CubicController) = {
+  def startJFXGui(gui: JFXGui) = {
     new Thread(new Runnable {
       def run() {
-        Gui.registerController(controller)
-        Gui.main(Array())
+        gui.main(Array())
       }
     }).start()
   }

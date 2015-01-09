@@ -42,8 +42,14 @@ import scalafx.scene.transform.Translate.sfxTranslate2jfx
 import scalafx.stage.Stage
 import scalafx.util.StringConverter
 
-object Gui extends JFXApp with Reactor {
-
+class JFXGui(controller: CubicController) extends JFXApp with Reactor {
+  
+  listenTo(controller)
+    reactions += {
+      case e: GameCreated => onGameCreated
+      case e: FieldChanged => onGameUpdated
+   }
+ 
   val occupiedSphereSize = 3
   val highlightedSphereSize = 4
   val emptySphereSize = 0.8
@@ -76,17 +82,8 @@ object Gui extends JFXApp with Reactor {
 
   val textFieldPl1 = new TextField { promptText = "Player 1" }
   val textFieldPl2 = new TextField { promptText = "Player 2" }
-
-  private var controller: CubicController = _
-
-  def registerController(controller: CubicController) {
-    this.controller = controller;
-    listenTo(controller)
-    reactions += {
-      case e: GameCreated => onGameCreated
-      case e: FieldChanged => onGameUpdated
-    }
-  }
+  
+   onGameCreated
 
   def onGameCreated = {
     val nameList = controller.players.toList
