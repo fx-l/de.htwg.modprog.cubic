@@ -7,7 +7,7 @@ class CubicPlayerBin private(
     val players: List[Player],
     val current: Player,
     val waiting: List[Player]) extends PlayerBin {
-  override def iterate = new CubicPlayerBin(players, waiting.head, waiting.drop(1) :+ current)
+  override def rotate = new CubicPlayerBin(players, waiting.head, waiting.drop(1) :+ current)
   override def reset = new CubicPlayerBin(players, players.head, players.tail)
   override def playerCount = players.length
 }
@@ -18,9 +18,9 @@ object CubicPlayerBin {
     val namedPlayers = disambiguate(players.map(defaultName(_)).toList)
     new CubicPlayerBin(namedPlayers, namedPlayers.head, namedPlayers.tail)
   }
-  def defaultName(p: Player) = (p.name, p.isCpu) match {
-      case (name, _) if !name.trim.isEmpty => p
-      case (_, isCpu) => if(isCpu) p.rename("CPU") else p.rename("Player")
+  def defaultName(p: Player) = p.name match {
+      case name if !name.trim.isEmpty => p
+      case _ => p.rename("Player")
   } 
   def disambiguate(ps: List[Player]) = {
     def uniqueness(old: List[Player], unique: List[Player]): List[Player] = old match {

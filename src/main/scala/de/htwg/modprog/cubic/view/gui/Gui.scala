@@ -89,7 +89,7 @@ object Gui extends JFXApp with Reactor {
   }
 
   def onGameCreated = {
-    val nameList = controller.players.map { case (name, _) => name }.toList
+    val nameList = controller.players.toList
     symbolMapping = Util.assignSymbols(nameList, symbols, new PhongMaterial(Color.Red), Map[String, Material]())
     Platform.runLater {
       val subScene = getSubScene
@@ -334,7 +334,7 @@ object Gui extends JFXApp with Reactor {
                     val player1 = textFieldPl1.getText()
                     val player2 = textFieldPl2.getText()
                     val boardSize = comboBoxBoardSize.getValue().charAt(0).asDigit
-                    controller.createCustomGame(Seq((player1, false), (player2, false)), boardSize)
+                    controller.createCustomGame(Seq(player1, player2), boardSize)
                     outer.close
                 }
               })

@@ -18,8 +18,6 @@ class Tui(var controller: CubicController) extends Reactor {
   val s = 10 // spacer
   val defaultGameSize = 4
   val defaultNamePrefix = "Player"
-  val intro = loadString("/tui_intro.txt")
-  val menu = loadString("/tui_menu.txt")
   val symbols = Seq('X', 'O', 'T', 'H')
   var symbolMapping = Map[String, Char]()
   
@@ -31,11 +29,10 @@ class Tui(var controller: CubicController) extends Reactor {
   def processInputLine(input: String) = {
     var continue = true
     input match {
-      case "a" => controller.createQuickVersusGame
-      case "b" => controller.createQuickCpuGame
-      case "c" => controller.createCustomGame(askForPlayers(2, Nil), askForSize(2 to 10))
+      case "q" => controller.createQuickVersusGame
+      case "c" => controller.createCustomGame(askForPlayers(), askForSize(2 to 10))
       case "r" => controller.restart
-      case "q" => continue = false
+      case "e" => continue = false
       case _ => if(!controller.hasWinner) {
         input.toList.filter(c => c != ' ').map(c => c.toString.toInt) match {
           case (x: Int) :: (y: Int) :: (z: Int) :: Nil => controller.occupyField(x - 1, y - 1, z - 1)
@@ -47,7 +44,7 @@ class Tui(var controller: CubicController) extends Reactor {
   }
   
   def onGameCreated = {
-    val nameList = controller.players.map{ case(name, _) => name }.toList
+    val nameList = controller.players.toList
     symbolMapping = assignSymbols(nameList, symbols, Map[String, Char]())
     onGameUpdated
   }
@@ -56,10 +53,10 @@ class Tui(var controller: CubicController) extends Reactor {
     drawFullUi
   }
   
-  def drawHeader = println(intro)
-  def drawMenu = println(menu)
+  def drawHeader = println(introString)
+  def drawMenu = println(menuString)
   def drawStatus = println(" " + controller.statusText + nl)  
-  def drawHud = println(" " + controller.currentPlayer._1  + ", it's your turn!")
+  def drawHud = println(" " + controller.currentPlayer  + ", it's your turn!")
   def drawCommands = println(" Enter xyz, where each is in the range from 1 to " + controller.boardSize)
   def drawGame = {
     def line(acc: String, x: Int, y: Int, z: Int): String = {
@@ -93,14 +90,11 @@ class Tui(var controller: CubicController) extends Reactor {
     }
   }
   
-  def askForPlayers(pc: Int, acc: List[(String, Boolean)]): List[(String, Boolean)] = pc match {
-    case pc if pc > 0 => {
-      println("Setup Player " + (acc.length + 1))
-      val name  = ask("Enter name (leave empty for default)")
-      val isCpu = ask("Is CPU? (y/n)") == "y"
-      askForPlayers(pc - 1, (name, isCpu) :: acc)
-    }
-    case _ => acc reverse
+  def askForPlayers(acc: List[String] = List[String]()): List[String] = {
+    println("Setup Player " + (acc.length + 1))
+    val name  = ask("Enter name (leave empty for default)")
+    val continue = ask("Add another player? (y/n)") == "y"
+    if(continue) askForPlayers(name :: acc) else (name :: acc) reverse
   }
   
   def askForSize(r: Range): Int = {
@@ -116,8 +110,6 @@ class Tui(var controller: CubicController) extends Reactor {
     readLine trim
   }
   
-  def loadString(path: String) = fromURL(getClass.getResource(path)).mkString
-  
   def assignSymbols(names: List[String], sym: Seq[Char], m: Map[String, Char]): Map[String, Char] = {
     names match {
       case name :: tail => { 
@@ -128,5 +120,24 @@ class Tui(var controller: CubicController) extends Reactor {
     }
     
   }
+  
+  val menuString = """
+ Menu      - create quick game (2 Players, 4x4x4)  [q]
+           - create customized game                [c] 
+           - restart with current settings         [r]
+           - exit                                  [e]
+  """
+  
+  val introString = """
+  =========================================
+   _____      _     _        ___    ___  
+  / ____|    | |   (_)      |__ \  / _ \ 
+ | |    _   _| |__  _  ___     ) || | | |
+ | |   | | | | '_ \| |/ __|   / / | | | |
+ | |___| |_| | |_) | | (__   / /_ | |_| |
+  \_____\__,_|_.__/|_|\___| |____(_)___/  
+
+ =========================================
+ """
   
 }

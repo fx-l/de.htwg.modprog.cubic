@@ -13,16 +13,13 @@ case class FieldChanged() extends Event
 class CubicController(var game: Game) extends Publisher {
   var statusText = ""
   def boardSize = game.size
-  def currentPlayer = (game.currentPlayer.name, game.currentPlayer.isCpu)
-  def players = game.players.map(p => (p.name, p.isCpu))
+  def currentPlayer = game.currentPlayer.name
+  def players = game.players.map(p => (p.name))
   def moveCount = game.moveCount
   def hasWinner = game.hasWinner != None
-  def createQuickVersusGame = createCustomGame(Seq(("Player 1", false),("Player 2", false)), 4)
-  def createQuickCpuGame = createCustomGame(Seq(("Player", false),("", true)), 4)
-  def createCustomGame(players: Seq[(String, Boolean)], size: Int) = {
-    val cubicPlayers = players.map {
-      case(name, isCpu) => CubicPlayer(name, isCpu)
-    }
+  def createQuickVersusGame = createCustomGame(Seq("Player 1","Player 2"), 4)
+  def createCustomGame(players: Seq[String], size: Int) = {
+    val cubicPlayers = players.map(CubicPlayer(_))
     game = game.create(cubicPlayers, size)
     statusText = "A new game was created"
     publish(GameCreated())

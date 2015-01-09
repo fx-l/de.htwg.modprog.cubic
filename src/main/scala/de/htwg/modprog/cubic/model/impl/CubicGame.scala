@@ -16,7 +16,7 @@ class CubicGame private(val board: Board, val pb: PlayerBin) extends Game {
   override def toString = "move: " + moveCount + ", current player: " + currentPlayer + ", others: " + waitingPlayers
   override def occupyField(x: Int, y: Int, z: Int) = {
     val nextBoard = board.occupyField(x, y, z, currentPlayer).updateWinnerState
-    if(nextBoard.moves > board.moves) new CubicGame(nextBoard, pb.iterate) else this
+    if(nextBoard.moves > board.moves) new CubicGame(nextBoard, pb.rotate) else this
   }
 }
 
