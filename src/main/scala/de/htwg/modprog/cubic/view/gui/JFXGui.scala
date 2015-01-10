@@ -1,7 +1,6 @@
 package de.htwg.modprog.cubic.view.gui
 
 import scala.swing.Reactor
-
 import de.htwg.modprog.cubic.controller.CubicController
 import de.htwg.modprog.cubic.controller.FieldChanged
 import de.htwg.modprog.cubic.controller.GameCreated
@@ -41,6 +40,10 @@ import scalafx.scene.transform.Translate
 import scalafx.scene.transform.Translate.sfxTranslate2jfx
 import scalafx.stage.Stage
 import scalafx.util.StringConverter
+import scalafx.event.EventHandler
+import javafx.event.EventHandler
+import javafx.stage.WindowEvent
+import scalafx.Includes._
 
 class JFXGui(controller: CubicController) extends JFXApp with Reactor {
   
@@ -62,8 +65,8 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
     specularColor = Color.White
     specularPower = 20.0
   }
-  val defaultMat = new PhongMaterial(Color.LightSteelBlue)
-  val symbols = Seq(new PhongMaterial(Color.LawnGreen), new PhongMaterial(Color.DeepPink))
+  val defaultMat = new PhongMaterial(Color.Black )
+  val symbols = Seq(new PhongMaterial(Color.Red), new PhongMaterial(Color.Blue), new PhongMaterial(Color.Green), new PhongMaterial(Color.Pink))
   var symbolMapping = Map[String, Material]()
   val configMaxGameSize = 20
   def coordsToId(x: Int, y: Int, z: Int) = sphereIdPrefix + "-" + x + "-" + y + "-" + z
@@ -80,8 +83,7 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
     value = "4 x 4 x 4"
   }
 
-  val textFieldPl1 = new TextField { promptText = "Player 1" }
-  val textFieldPl2 = new TextField { promptText = "Player 2" }
+  val textFieldPlayers = new TextField { promptText = "Player 1, Player 2" }
   
    onGameCreated
 
@@ -137,27 +139,30 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
   stage = new PrimaryStage {
     title = "Cubic"
     scene = new Scene(900, 900, true, SceneAntialiasing.Balanced) {
-      fill = Color.Black
+      fill = Color.White
       var tmpw = this.width
       var tmph = this.height
       root = new BorderPane {
-        fill = Color.Black
+        fill = Color.White
         top = new VBox {
           content = Seq(createMenu, createStatusBar)
         }
         center = createView(tmpw, tmph)
       }
+      
     }
     width onChange show
     height onChange show
+    onCloseRequest = handle {System.exit(0)}
   }
+  
 
   // creategame window
   def createView(boundWidth: ReadOnlyDoubleProperty, boundHeight: ReadOnlyDoubleProperty): BorderPane = {
     new BorderPane {
       center = new SubScene(boundWidth.get(), boundHeight.get(), true, SceneAntialiasing.Balanced) {
         id = "sub"
-        fill = Color.Black
+        fill = Color.White
         this.width.bind(boundWidth.add(0))
         this.height.bind(boundHeight.add(0))
       }
@@ -274,26 +279,26 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
           items = List(new Menu("New Game") {
             items = List(new MenuItem("Quickstart") {
               accelerator = KeyCombination.keyCombination("s")
-              onAction = {
-                e: ActionEvent => controller.createQuickVersusGame
+              onAction = handle {
+                controller.createQuickVersusGame
               }
             }, new MenuItem("Custom Setup") {
               accelerator = KeyCombination.keyCombination("c")
-              onAction = {
-                e: ActionEvent => showCustomGameDialog()
+              onAction = handle {
+               showCustomGameDialog()
               }
             })
           },
             new MenuItem("Restart (curr. setup)") {
               accelerator = KeyCombination.keyCombination("r")
-              onAction = {
-                e: ActionEvent => controller.restart
+              onAction = handle {
+                controller.restart
               }
             },
             new MenuItem("Quit") {
               accelerator = KeyCombination.keyCombination("q")
-              onAction = {
-                e: ActionEvent => System.exit(0)
+              onAction = handle {
+                System.exit(0)
               }
             })
         })
@@ -303,7 +308,7 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
   private def showCustomGameDialog() {
     val dialogStage = new Stage {
       outer =>
-      title = "Custom Game"
+      title = "Custom Setup"
       width = 500
       height = 300
       resizable = false
@@ -314,25 +319,25 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
             spacing = 25
             alignment = Pos.Center
             content = Seq(
-              new Label { text = "Please enter names" },
+              new Label { text = "Enter player names as comma-separated" },
               new HBox {
                 spacing = 10
-                content = List(new Label { text = "Player 1: " }, textFieldPl1)
-              }, new HBox {
-                spacing = 10
-                content = List(new Label { text = "Player 2: " }, textFieldPl2)
+                content = List(new Label { text = "Players: " }, textFieldPlayers )
               }, new Label { text = "Choose a board size" }, new HBox {
                 spacing = 10
                 content = List(new Label { text = "Board size:" }, comboBoxBoardSize)
               }, new Button {
                 text = "Start Game"
-                onAction = {
-                  e: ActionEvent =>
-                    val player1 = textFieldPl1.getText()
-                    val player2 = textFieldPl2.getText()
-                    val boardSize = comboBoxBoardSize.getValue().charAt(0).asDigit
-                    controller.createCustomGame(Seq(player1, player2), boardSize)
+                onAction = handle {           
+                    if(textFieldPlayers.getText()!=null && !textFieldPlayers .getText().isEmpty()){
+                      val players = textFieldPlayers.getText().split(",")
+                      val boardSize = comboBoxBoardSize.getValue().charAt(0).asDigit
+                    controller.createCustomGame(players, boardSize)
                     outer.close
+                    }            
+                    else{
+                      textFieldPlayers .setText("Please enter player names as comma-separated")
+                    }
                 }
               })
           }
