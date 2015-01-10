@@ -16,6 +16,7 @@ scalacOptions in Test ++= Seq("-Yrangepos")
 resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
 
 fork := true
+
 connectInput in run := true
 
 fork in Test := true
