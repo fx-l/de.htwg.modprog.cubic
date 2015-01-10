@@ -21,7 +21,7 @@ class CubicController(var game: Game) extends Publisher {
   def createCustomGame(players: Seq[String], size: Int) = {
     val cubicPlayers = players.map(CubicPlayer(_))
     game = game.create(cubicPlayers, size)
-    statusText = "A new game was created"
+    statusText = "A new game was created."
     publish(GameCreated())
   }
   def occupyField(x: Int, y: Int, z: Int) = {
@@ -29,14 +29,14 @@ class CubicController(var game: Game) extends Publisher {
     game = game.occupyField(x, y, z)
     statusText = game.hasWinner match {
       case Some(p) => p + " has won the game!"
-      case None if moveCount == game.moveCount => "Field not available, try again"
+      case None if moveCount == game.moveCount => "Field not available, try again."
       case _ => ""
     }
     publish(FieldChanged())
   }
   def restart = {
     game = game.restart
-    statusText = "Game was restarted with current settings"
+    statusText = "Game was restarted with current settings."
     publish(FieldChanged())
   }
   def field(x: Int, y: Int, z: Int) = {

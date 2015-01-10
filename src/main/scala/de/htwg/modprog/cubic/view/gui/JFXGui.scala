@@ -96,12 +96,14 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
       subScene.content = basicContent
       subScene.camera = createCamera
       addMouseInteraction(subScene, basicContent)
+      onGameUpdated
     }
   }
 
   def onGameUpdated = {
     Platform.runLater {
       update3dContent
+      setStatusText
     }
   }
 
@@ -132,8 +134,12 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
     new SubScene(javaSubScene)
   }
 
-  def setStatusText(statusText: String) {
-
+  def setStatusText {
+    val turn = if(controller.hasWinner) "" else "Turn: " + controller.currentPlayer
+    val message = if(controller.statusText.isEmpty()) turn else controller.statusText + " " + turn
+    val javaText = stage.scene().lookup("#statusText").asInstanceOf[javafx.scene.text.Text]
+    val text = new Text(javaText)
+    text.text = message
   }
 
   stage = new PrimaryStage {
@@ -164,7 +170,7 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
         id = "sub"
         fill = Color.White
         this.width.bind(boundWidth.add(0))
-        this.height.bind(boundHeight.add(0))
+        this.height.bind(boundHeight.add(-20))
       }
     }
   }
@@ -184,18 +190,14 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
   // a method for creating the status bar
   def createStatusBar = {
     new VBox {
-      padding = Insets(8)
+      padding = Insets(6)
       content = new Text {
-        text = "Status messages go here"
-        style = "-fx-font-size: 20pt"
+        text = ""
+        style = "-fx-font-size: 18pt"
+        id = "statusText"
         fill = new LinearGradient(
           endX = 0,
           stops = Stops(Color.Cyan, Color.DodgerBlue))
-        effect = new DropShadow {
-          color = Color.DodgerBlue
-          radius = 25
-          spread = 0.25
-        }
       }
     }
   }
@@ -336,7 +338,7 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
                     outer.close
                     }            
                     else{
-                      textFieldPlayers .setText("Please enter player names as comma-separated")
+                      textFieldPlayers .setText("Please enter player names as comma-separated values")
                     }
                 }
               })
