@@ -1,10 +1,10 @@
 package de.htwg.modprog.cubic.model
 
-trait PlayerBin {
+trait Rotation {
   def players: List[Player]
   def current: Player
   def waiting: List[Player]
   def playerCount: Int
-  def rotate: PlayerBin
-  def reset: PlayerBin
+  def rotate: Rotation
+  def reset: Rotation
 }

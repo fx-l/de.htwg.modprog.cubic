@@ -39,7 +39,6 @@ class CubicController(var game: Game) extends Publisher {
     statusText = "Game was restarted with current settings"
     publish(FieldChanged())
   }
-  def isFieldOccupied(x: Int, y: Int, z: Int) = game.isFieldOccupied(x, y, z)
   def field(x: Int, y: Int, z: Int) = {
     val f = game.field(x, y, z)
     f.occupiedBy match {
