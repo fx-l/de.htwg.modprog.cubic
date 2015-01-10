@@ -16,6 +16,7 @@ libraryDependencies += "junit" % "junit" % "4.11" % "test"
 //)
 
 fork := true
+
 connectInput in run := true
 
 fork in Test := true
