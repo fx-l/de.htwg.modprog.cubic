@@ -14,7 +14,7 @@ extends Board {
   def coordToIndex = transformCoords(n) _
   def validCoords(x: Int, y: Int, z: Int) = List(x, y, z).forall(x => x >= 0 && x < n)
   override def field(x: Int, y: Int, z: Int) = cube(coordToIndex(x, y, z))
-  override def fieldIsOccupied(x: Int, y: Int, z: Int) = !field(x, y, z).isOccupied
+  override def fieldIsOccupied(x: Int, y: Int, z: Int) = field(x, y, z).isOccupied
   override def toString() = "board: " + n + ("x" + n) * 2 + ", winner: " + hasWinner + ", content: " + cube
   // occupy a field
   override def occupyField(x: Int, y: Int, z: Int, p: Player) = {
@@ -51,17 +51,17 @@ object CubicBoard {
     val winningCoords = determineWinningCoords(sideLength)
     new CubicBoard(cube, winningCoords.toList, None, 0)
   }
-  def spanLines(n: Int, base: Seq[(Int, Int, Int)], to: (Int, Int, Int)) = {
+  private def spanLines(n: Int, base: Seq[(Int, Int, Int)], to: (Int, Int, Int)) = {
     for ((x, y, z) <- base; i <- (0 until n)) yield (x + to._1  * i, y + to._2 * i, z + to._3 * i)
   }
   @tailrec
-  def span(n: Int, baseLines: Seq[(Int, Int, Int)], dirs: List[(Int, Int, Int)]): Seq[(Int, Int, Int)] = {
+  private def span(n: Int, baseLines: Seq[(Int, Int, Int)], dirs: List[(Int, Int, Int)]): Seq[(Int, Int, Int)] = {
     dirs match {
       case Nil => baseLines
       case d :: tail => span(n, spanLines(n, baseLines, d), tail)
     }	  
   }
-  def determineWinningCoords(n: Int) = {
+  private def determineWinningCoords(n: Int) = {
     val max = n - 1
     val winningLinesGenericDescription = Seq(
         ((0,0,0), List((0,1,0),(0,0,1),(1,0,0))), 		// lineset along x axis
