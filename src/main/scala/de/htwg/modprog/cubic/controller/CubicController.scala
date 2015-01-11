@@ -15,8 +15,7 @@ class CubicController(var game: Game) extends Publisher {
   def boardSize = game.size
   def currentPlayer = game.currentPlayer.name
   def players = game.players.map(p => (p.name))
-  def moveCount = game.moveCount
-  def hasWinner = game.hasWinner != None
+  def hasWinner = game.winner != None
   def createQuickVersusGame = createCustomGame(Seq("Player 1","Player 2"), 4)
   def createCustomGame(players: Seq[String], size: Int) = {
     val cubicPlayers = players.map(CubicPlayer(_))
@@ -27,8 +26,8 @@ class CubicController(var game: Game) extends Publisher {
   def occupyField(x: Int, y: Int, z: Int) = {
     val moveCount = game.moveCount
     game = game.occupyField(x, y, z)
-    statusText = game.hasWinner match {
-      case Some(p) => p + " has won the game!"
+    statusText = game.winner match {
+      case Some(p) => p.name + " has won the game!"
       case None if moveCount == game.moveCount => "Field not available, try again."
       case _ => ""
     }

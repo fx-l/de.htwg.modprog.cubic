@@ -39,7 +39,7 @@ class BoardSpec extends Specification {
       }
      " not have a winner" in {
         val board2 = board.updateWinnerState
-        board2.hasWinner must be_==(None)
+        board2.winner must be_==(None)
       }
      " return a new board when occupying a field" in {
        val player = new CubicPlayer("John Doe")
@@ -52,10 +52,10 @@ class BoardSpec extends Specification {
        val board3 = board.occupyField(0, 0, 1, player).occupyField(1, 0, 1, player).updateWinnerState
        val board4 = board.occupyField(0, 1, 0, player).occupyField(1, 1, 0, player).updateWinnerState
        val board5 = board.occupyField(0, 1, 1, player).occupyField(1, 1, 1, player).updateWinnerState
-       board2.hasWinner must be_==(Some(player))
-       board3.hasWinner must be_==(Some(player))
-       board4.hasWinner must be_==(Some(player))
-       board5.hasWinner must be_==(Some(player))
+       board2.winner must be_==(Some(player))
+       board3.winner must be_==(Some(player))
+       board4.winner must be_==(Some(player))
+       board5.winner must be_==(Some(player))
       }
      " be solvable in y directions" in {
        val player = new CubicPlayer("John Doe")
@@ -63,10 +63,10 @@ class BoardSpec extends Specification {
        val board3 = board.occupyField(1, 0, 0, player).occupyField(1, 1, 0, player).updateWinnerState
        val board4 = board.occupyField(0, 0, 1, player).occupyField(0, 1, 1, player).updateWinnerState
        val board5 = board.occupyField(1, 0, 0, player).occupyField(1, 1, 1, player).updateWinnerState
-       board2.hasWinner must be_==(Some(player))
-       board3.hasWinner must be_==(Some(player))
-       board4.hasWinner must be_==(Some(player))
-       board5.hasWinner must be_==(Some(player))
+       board2.winner must be_==(Some(player))
+       board3.winner must be_==(Some(player))
+       board4.winner must be_==(Some(player))
+       board5.winner must be_==(Some(player))
       }
      " be solvable in z directions" in {
        val player = new CubicPlayer("John Doe")
@@ -74,10 +74,10 @@ class BoardSpec extends Specification {
        val board3 = board.occupyField(1, 0, 0, player).occupyField(1, 0, 1, player).updateWinnerState
        val board4 = board.occupyField(0, 1, 0, player).occupyField(0, 1, 1, player).updateWinnerState
        val board5 = board.occupyField(1, 1, 0, player).occupyField(1, 1, 1, player).updateWinnerState
-       board2.hasWinner must be_==(Some(player))
-       board3.hasWinner must be_==(Some(player))
-       board4.hasWinner must be_==(Some(player))
-       board5.hasWinner must be_==(Some(player))
+       board2.winner must be_==(Some(player))
+       board3.winner must be_==(Some(player))
+       board4.winner must be_==(Some(player))
+       board5.winner must be_==(Some(player))
       }
      " be solvable for all layer diagonals" in {
        val player = new CubicPlayer("John Doe")
@@ -93,18 +93,18 @@ class BoardSpec extends Specification {
        val board11 = board.occupyField(1, 1, 0, player).occupyField(1, 0, 1, player).updateWinnerState
        val board12 = board.occupyField(0, 0, 0, player).occupyField(0, 1, 1, player).updateWinnerState
        val board13 = board.occupyField(1, 0, 0, player).occupyField(1, 1, 1, player).updateWinnerState
-       board2.hasWinner must be_==(Some(player))
-       board3.hasWinner must be_==(Some(player))
-       board4.hasWinner must be_==(Some(player))
-       board5.hasWinner must be_==(Some(player))
-       board6.hasWinner must be_==(Some(player))
-       board7.hasWinner must be_==(Some(player))
-       board8.hasWinner must be_==(Some(player))
-       board9.hasWinner must be_==(Some(player))
-       board10.hasWinner must be_==(Some(player))
-       board11.hasWinner must be_==(Some(player))
-       board12.hasWinner must be_==(Some(player))
-       board13.hasWinner must be_==(Some(player))
+       board2.winner must be_==(Some(player))
+       board3.winner must be_==(Some(player))
+       board4.winner must be_==(Some(player))
+       board5.winner must be_==(Some(player))
+       board6.winner must be_==(Some(player))
+       board7.winner must be_==(Some(player))
+       board8.winner must be_==(Some(player))
+       board9.winner must be_==(Some(player))
+       board10.winner must be_==(Some(player))
+       board11.winner must be_==(Some(player))
+       board12.winner must be_==(Some(player))
+       board13.winner must be_==(Some(player))
       }
       " be solvable for all room diagonals" in {
        val player = new CubicPlayer("John Doe")
@@ -112,10 +112,10 @@ class BoardSpec extends Specification {
        val board3 = board.occupyField(1, 0, 0, player).occupyField(0, 1, 1, player).updateWinnerState
        val board4 = board.occupyField(0, 0, 1, player).occupyField(1, 1, 0, player).updateWinnerState
        val board5 = board.occupyField(1, 0, 1, player).occupyField(0, 1, 0, player).updateWinnerState
-       board2.hasWinner must be_==(Some(player))
-       board3.hasWinner must be_==(Some(player))
-       board4.hasWinner must be_==(Some(player))
-       board5.hasWinner must be_==(Some(player))
+       board2.winner must be_==(Some(player))
+       board3.winner must be_==(Some(player))
+       board4.winner must be_==(Some(player))
+       board5.winner must be_==(Some(player))
       }
   }
 

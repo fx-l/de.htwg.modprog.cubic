@@ -11,7 +11,7 @@ class PlayerSpec extends Specification {
         player.name must be_==(name)
       }
       "generate a string from its name" in {
-        player.toString must be_==(name)
+        player.toString.contains(name) must be_==(true)
       }
     }
   

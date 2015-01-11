@@ -3,11 +3,12 @@ package de.htwg.modprog.cubic.model.impl
 import scala.annotation.tailrec
 import de.htwg.modprog.cubic.model._
 import de.htwg.modprog.cubic.model.impl.CubicBoard._
+import de.htwg.modprog.cubic.util.Util
 
 class CubicBoard private(
     val cube: IndexedSeq[Field],
     val winningLines: List[Seq[Int]],
-    val hasWinner: Option[Player],
+    val winner: Option[Player],
     val moves: Int)
 extends Board {
   val n = math.cbrt(cube.length).toInt
@@ -15,12 +16,12 @@ extends Board {
   def validCoords(x: Int, y: Int, z: Int) = List(x, y, z).forall(x => x >= 0 && x < n)
   override def field(x: Int, y: Int, z: Int) = cube(coordToIndex(x, y, z))
   override def fieldIsOccupied(x: Int, y: Int, z: Int) = field(x, y, z).isOccupied
-  override def toString() = "board: " + n + ("x" + n) * 2 + ", winner: " + hasWinner + ", content: " + cube
+  override def toString = Util.board2Text(this)
   // occupy a field
   override def occupyField(x: Int, y: Int, z: Int, p: Player) = {
     val i = coordToIndex(x, y, z)    
     if(!validCoords(x, y, z) || cube(i).isOccupied) this else
-      new CubicBoard(cube.updated(i, cube(i).occupy(p)), winningLines, hasWinner, moves + 1)
+      new CubicBoard(cube.updated(i, cube(i).occupy(p)), winningLines, winner, moves + 1)
   }
   // in case of available winner, involved line gets highlighted and player is set
   override def updateWinnerState = isSolved(winningLines) match {

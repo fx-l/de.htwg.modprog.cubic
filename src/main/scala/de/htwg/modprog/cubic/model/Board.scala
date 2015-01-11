@@ -7,5 +7,5 @@ trait Board {
   def fieldIsOccupied(x: Int, y: Int, z: Int): Boolean
   def occupyField(x: Int, y: Int, z: Int, p: Player): Board
   def updateWinnerState: Board
-  def hasWinner: Option[Player]
+  def winner: Option[Player]
 }
