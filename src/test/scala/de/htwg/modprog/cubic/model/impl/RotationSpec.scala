@@ -5,7 +5,7 @@ import org.specs2.mutable._
 class RotationSpec extends Specification {
   
   "A new rotation" should {
-    val players = Seq(CubicPlayer("John Doe"),CubicPlayer("Jane Doe"),CubicPlayer("Jim Doe"))
+    val players = Seq(CubicPlayer("John Doe"),CubicPlayer("John Doe"),CubicPlayer("Jane Doe"),CubicPlayer("Jim Doe"))
     val rot = CubicRotation(players)
       "have the correct amount of players" in {
         rot.playerCount must be_==(players.size)
@@ -13,6 +13,9 @@ class RotationSpec extends Specification {
       "have the correct order" in {
         rot.current must be_==(players(0))
         rot.waiting must be_==(players.drop(1))
+      }
+      "rename correctly" in {
+        rot.current.name must be_!=(rot.waiting(0))
       }
     }
   

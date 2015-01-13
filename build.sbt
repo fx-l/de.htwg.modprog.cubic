@@ -4,6 +4,8 @@ version := "1.0"
 
 scalaVersion := "2.11.4" 
 
+resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
+
 libraryDependencies ++= Seq(
 	"org.scala-lang" % "scala-swing" % "2.11.0-M7",
 	"org.scalafx" %% "scalafx" % "8.0.20-R6",
@@ -13,7 +15,7 @@ libraryDependencies ++= Seq(
 
 scalacOptions in Test ++= Seq("-Yrangepos")
 
-resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
+ScoverageSbtPlugin.ScoverageKeys.coverageExcludedPackages := "de.htwg.modprog.cubic.view.*;de.htwg.modprog.cubic"
 
 fork := true
 
