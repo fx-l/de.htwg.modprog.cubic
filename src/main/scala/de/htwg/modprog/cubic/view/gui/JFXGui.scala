@@ -46,13 +46,13 @@ import javafx.stage.WindowEvent
 import scalafx.Includes._
 
 class JFXGui(controller: CubicController) extends JFXApp with Reactor {
-  
+
   listenTo(controller)
-    reactions += {
-      case e: GameCreated => onGameCreated
-      case e: FieldChanged => onGameUpdated
-   }
- 
+  reactions += {
+    case e: GameCreated => onGameCreated
+    case e: FieldChanged => onGameUpdated
+  }
+
   val occupiedSphereSize = 3
   val highlightedSphereSize = 4
   val emptySphereSize = 0.8
@@ -62,10 +62,10 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
   val sphereIdPrefix = "sphere"
   val highlightMat = new PhongMaterial {
     diffuseColor = Color.Yellow
-    specularColor = Color.White
+    specularColor = Color.Black
     specularPower = 20.0
   }
-  val defaultMat = new PhongMaterial(Color.Black )
+  val defaultMat = new PhongMaterial(Color.White)
   val symbols = Seq(new PhongMaterial(Color.Red), new PhongMaterial(Color.Blue), new PhongMaterial(Color.Green), new PhongMaterial(Color.Pink))
   var symbolMapping = Map[String, Material]()
   val configMaxGameSize = 20
@@ -77,15 +77,15 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
     maxWidth = 200
     editable = true
     items = ObservableBuffer(
-      "2 x 2 x 2", "3 x 3 x 3", "4 x 4 x 4",
+      "3 x 3 x 3", "4 x 4 x 4",
       "5 x 5 x 5", "6 x 6 x 6", "7 x 7 x 7",
       "8 x 8 x 8")
     value = "4 x 4 x 4"
   }
 
   val textFieldPlayers = new TextField { promptText = "Player 1, Player 2" }
-  
-   onGameCreated
+
+  onGameCreated
 
   def onGameCreated = {
     val nameList = controller.players.toList
@@ -135,8 +135,8 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
   }
 
   def setStatusText {
-    val turn = if(controller.hasWinner) "" else "Turn: " + controller.currentPlayer
-    val message = if(controller.statusText.isEmpty()) turn else controller.statusText + " " + turn
+    val turn = if (controller.hasWinner) "" else "Turn: " + controller.currentPlayer
+    val message = if (controller.statusText.isEmpty()) turn else controller.statusText + " " + turn
     val javaText = stage.scene().lookup("#statusText").asInstanceOf[javafx.scene.text.Text]
     val text = new Text(javaText)
     text.text = message
@@ -145,30 +145,29 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
   stage = new PrimaryStage {
     title = "Cubic"
     scene = new Scene(900, 900, true, SceneAntialiasing.Balanced) {
-      fill = Color.White
+      fill = Color.Black
       var tmpw = this.width
       var tmph = this.height
       root = new BorderPane {
-        fill = Color.White
+        fill = Color.Black
         top = new VBox {
           content = Seq(createMenu, createStatusBar)
         }
         center = createView(tmpw, tmph)
       }
-      
+
     }
     width onChange show
     height onChange show
-    onCloseRequest = handle {System.exit(0)}
+    onCloseRequest = handle { System.exit(0) }
   }
-  
 
   // creategame window
   def createView(boundWidth: ReadOnlyDoubleProperty, boundHeight: ReadOnlyDoubleProperty): BorderPane = {
     new BorderPane {
       center = new SubScene(boundWidth.get(), boundHeight.get(), true, SceneAntialiasing.Balanced) {
         id = "sub"
-        fill = Color.White
+        fill = Color.Black
         this.width.bind(boundWidth.add(0))
         this.height.bind(boundHeight.add(-20))
       }
@@ -287,7 +286,7 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
             }, new MenuItem("Custom Setup") {
               accelerator = KeyCombination.keyCombination("c")
               onAction = handle {
-               showCustomGameDialog()
+                showCustomGameDialog()
               }
             })
           },
@@ -324,22 +323,23 @@ class JFXGui(controller: CubicController) extends JFXApp with Reactor {
               new Label { text = "Enter player names as comma-separated" },
               new HBox {
                 spacing = 10
-                content = List(new Label { text = "Players: " }, textFieldPlayers )
+                content = List(new Label { text = "Players: " }, textFieldPlayers)
               }, new Label { text = "Choose a board size" }, new HBox {
                 spacing = 10
                 content = List(new Label { text = "Board size:" }, comboBoxBoardSize)
               }, new Button {
                 text = "Start Game"
-                onAction = handle {           
-                    if(textFieldPlayers.getText()!=null && !textFieldPlayers .getText().isEmpty()){
-                      val players = textFieldPlayers.getText().split(",")
+                onAction = handle {
+                  if (textFieldPlayers.getText() != null && !textFieldPlayers.getText().isEmpty()) {
+                    val players = textFieldPlayers.getText().split(",")
+                    if (players.length > 1) {
                       val boardSize = comboBoxBoardSize.getValue().charAt(0).asDigit
-                    controller.createCustomGame(players, boardSize)
-                    outer.close
-                    }            
-                    else{
-                      textFieldPlayers .setText("Please enter player names as comma-separated values")
+                      controller.createCustomGame(players, boardSize)
+                      outer.close
                     }
+                  } else {
+                    textFieldPlayers.setText("Please enter player names as comma-separated values")
+                  }
                 }
               })
           }
