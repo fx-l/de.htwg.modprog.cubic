@@ -21,10 +21,16 @@ class UtilSpec extends Specification {
     }
   
   "Util's board2Text " should {
-    val board = CubicBoard(4).occupyField(0, 0, 0, CubicPlayer("bla"))
+    val player = CubicPlayer("A")
+    val board = CubicBoard(2)
       "return a board representation" in {
-        val txt = Util.board2Text(board)
-        txt must be_!=("")
+        val c = Util.board2Text(board).count(_ == '.')
+        println(Util.board2Text(board))
+        c must be_==(8)
+      }
+      "mark winning line" in {
+        val board2 = board.occupyField(0, 0, 0, player).occupyField(1, 0, 0, player).updateWinnerState
+        Util.board2Text(board2).contains("[") must be_==(true)
       }
       
     }

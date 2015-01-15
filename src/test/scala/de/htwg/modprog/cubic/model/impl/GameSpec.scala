@@ -68,6 +68,11 @@ class GameSpec extends Specification {
         game3.players.size must be_==(players.size + 1)
         game3.currentPlayer must be_==(game.currentPlayer)
       }
+    " generate a proper string for worksheet development" in {
+        val str = game.toString
+        str.contains(game.moveCount.toString) must be_==(true)
+        str.contains(game.currentPlayer.name) must be_==(true)
+      }
     
   }
 

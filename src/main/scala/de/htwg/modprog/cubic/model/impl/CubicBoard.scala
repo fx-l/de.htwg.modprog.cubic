@@ -42,6 +42,15 @@ extends Board {
   private def highlightFields(f: Seq[Int], cube: IndexedSeq[Field]): IndexedSeq[Field] = {
     if(!f.isEmpty) highlightFields(f.tail, cube.updated(f.head, cube(f.head).highlight)) else cube
   }
+  
+  def map[B](f: Field => B): IndexedSeq[B] = {
+    cube.map(f)
+  }
+
+  def withFilter(f: Field => Boolean): Board = {
+    new CubicBoard(cube.filter(f), winningLines, winner, moves)
+  }
+
 }
 
 object CubicBoard {

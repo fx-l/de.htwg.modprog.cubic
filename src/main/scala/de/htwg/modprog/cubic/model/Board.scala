@@ -8,4 +8,5 @@ trait Board {
   def occupyField(x: Int, y: Int, z: Int, p: Player): Board
   def updateWinnerState: Board
   def winner: Option[Player]
+  def map[B](f: Field => B): IndexedSeq[B]
 }

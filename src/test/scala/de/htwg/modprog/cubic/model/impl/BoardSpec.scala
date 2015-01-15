@@ -4,6 +4,8 @@ import org.specs2.mutable._
 
 class BoardSpec extends Specification {
   
+  sequential
+  
   "A new Board with size of 2" should {
     val size = 2
     val board = CubicBoard(size)
@@ -116,6 +118,14 @@ class BoardSpec extends Specification {
        board3.winner must be_==(Some(player))
        board4.winner must be_==(Some(player))
        board5.winner must be_==(Some(player))
+      }
+      " return a string for worksheet development" in {
+       val str = board.toString.count(_ == '.')
+       str must be_==(8)
+      }
+      " work with the for expression" in {
+       val fields = for(field <- board; if field.isOccupied) yield field
+       fields.size must be_==(0)
       }
   }
 
